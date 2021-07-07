@@ -1,0 +1,10 @@
+{
+  "name": "pullup",
+  "version": "1.0.0",
+  "description": "Pull up, pop out. Leave a message in space.",
+  "main": "index.js",
+  "repository": "https://github.com/tdotholla/pullup.git",
+  "author": "Kiel H. Byrne",
+  "license": "MIT",
+  "private": true
+}
