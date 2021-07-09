@@ -5,7 +5,7 @@ import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { Provider } from "next-auth/client";
 import { SWRConfig } from "swr";
 import fetcher from "../util/fetch";
-// import { BRAND_THEME } from '../util/sample-data'
+import { BRAND_THEME } from '../util/constants'
 
 const swr_config_options = {
   refreshInterval: 0,
@@ -14,8 +14,7 @@ const swr_config_options = {
 };
 
 const theme = extendTheme(
-  // BRAND_THEME
-  {}
+  BRAND_THEME
 )
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
