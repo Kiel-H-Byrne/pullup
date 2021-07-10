@@ -7,7 +7,7 @@ interface Props {
 
 const MyFooter = (props: Props) => {
   return (
-    <footer>
+    <footer style={{position: "absolute", bottom: 0}}>
       <Center fontSize={"xs"} {...props}>© Copyright TenK Solutions, LLC. All Rights Reserved</Center>
     </footer>
   );
