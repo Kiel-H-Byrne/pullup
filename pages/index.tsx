@@ -1,10 +1,8 @@
 import React, { useEffect, useRef } from "react";
-import { Layout, LocateMeButton } from "../components";
-import { Box } from "@chakra-ui/react";
+import { Layout, LocateMeButton, PullUpButton } from "../components";
 import { Loader } from "@googlemaps/js-api-loader";
 import { MAP_STYLES } from "../util/constants";
 import { useState } from "react";
-import { PullUpButton } from "../components/PullUpButton";
 
 const mapCenter = { lat: -34.397, lng: 150.644 };
 

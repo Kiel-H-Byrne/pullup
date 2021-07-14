@@ -14,20 +14,20 @@ export default async (req: any, res: any) => {
   // console.log(req.query)
   switch (method) {
     case "GET":
-      const comments = await getComments(
+      const pullups = await getPullUps(
         db,
-        req.query.from ? new Date(req.query.from) : undefined,
-        req.query.oid,
+        req.query.from && {lat: 0,lng: 0},
+        req.query.pid,
         req.query.limit ? parseInt(req.query.limit, 10) : undefined
       );
 
-      if (req.query.from && comments.length > 0) {
+      if (req.query.from && pullups.length > 0) {
         // This is safe to cache because from defines
-        //  a concrete range of comments
+        //  a concrete range of pullups
         res.setHeader("cache-control", `public, max-age=${MAX_AGE}`);
       }
 
-      res.send({ comments });
+      res.send({ pullups: pullups });
       break;
     case "POST":
       // if (!req.user) {
@@ -36,8 +36,8 @@ export default async (req: any, res: any) => {
         // console.log(req.body.data)
         if (!req.body)
           return res.status(400).send("You must write something");
-        const comment = await insertComment(db, req.body.data);
-        return res.json({ comment });
+        const pullup = await insertPullUp(db, req.body.data);
+        return res.json({ pullup });
       break;
     default:
       res.setHeader("Allow", ["GET", "POST"]);

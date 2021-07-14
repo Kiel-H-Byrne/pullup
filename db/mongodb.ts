@@ -14,8 +14,9 @@ export async function connectToDatabase() {
 
   // Connect to our MongoDB database hosted on MongoDB Atlas
   const client = await MongoClient.connect(process.env.MONGODB_URI!, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+    // @ts-igno_re
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true,
     maxIdleTimeMS: 10000,
     serverSelectionTimeoutMS: 10000,
     socketTimeoutMS: 20000
