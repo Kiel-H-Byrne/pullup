@@ -1,16 +1,14 @@
-import { Center } from '@chakra-ui/react'
-import React from 'react'
+import { Center, Flex } from "@chakra-ui/react";
+import React from "react";
 
-interface Props {
-  
-}
+interface Props {}
 
-const MyFooter = (props: Props) => {
+export const MyFooter = (props: Props) => {
   return (
-    <footer style={{position: "absolute", bottom: 0}}>
-      <Center fontSize={"xs"} {...props}>© Copyright TenK Solutions, LLC. All Rights Reserved</Center>
-    </footer>
+    <Flex as="footer" position="absolute" bottom={0} left={0} zIndex={1}>
+      <Center fontSize={"xs"} {...props}>
+        © Copyright TenK Solutions, LLC. All Rights Reserved
+      </Center>
+    </Flex>
   );
-}
-
-export default MyFooter
+};

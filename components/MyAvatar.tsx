@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { CheckCircleIcon } from "@chakra-ui/icons";
 
-const MyAvatar = () => {
+export const MyAvatar = () => {
   const [session, loading] = useSession();
   return session?.user && !loading ? (
     <Popover placement="top-start">
@@ -49,5 +49,3 @@ const MyAvatar = () => {
     </Button>
   );
 };
-
-export default MyAvatar;

@@ -5,7 +5,7 @@ interface Props {
   title: string
 }
 
-const CustomHead = ({title}: Props) => {
+export const CustomHead = ({title}: Props) => {
   
   return (
     <Head>
@@ -91,5 +91,3 @@ const CustomHead = ({title}: Props) => {
     </Head>
   );
 };
-
-export default CustomHead;
