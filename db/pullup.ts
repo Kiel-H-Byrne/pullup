@@ -35,13 +35,10 @@ export async function findPullUpById(db: Db, pullupId: string) {
 }
 
 export async function insertPullUp(db: Db, data: PullUp) {
-  const { uid } = data;
-
   return db.collection("pullups").insertOne({
     ...data,
-    uid: uid,
-  });
-  // .then(({ ops }) => ops[0]);
+  })
+  .then(({ insertedId }) => insertedId);
 }
 
 export async function updatePullUpById(db: Db, id: string, update: object) {

@@ -20,7 +20,6 @@ export const PullUpButton = (props: Props) => {
     navigator.geolocation &&
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log(position)
           setLocationData(position)
         },
         (error) => {

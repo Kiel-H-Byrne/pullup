@@ -15,9 +15,10 @@ interface Props {
 
 export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
   const [session, loading] = useSession();
+  console.log(session.user)
   const formik = useFormik({
     initialValues: {
-      uid,
+      // uid,
       message: "",
     } as any,
     validate: async (values: PullUp) => {
@@ -44,7 +45,7 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
       const submit_data = {
         ...values,
         userName,
-        uid,
+        // uid,
         location: {
           lat: locationData.coords.latitude,
           lng: locationData.coords.longitude,
@@ -52,6 +53,7 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
         timestamp: new Date(locationData.timestamp),
       };
       mutate(apiUri, submit_data, false); //should i put mutate here or after the post with no options.
+      console.log(submit_data)
       mutate(
         apiUri,
         await axios.post(apiUri, {
@@ -67,7 +69,7 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
 
   return (
     <Box marginInline="3">
-      {!formik.isSubmitting ? ( //if a user is logged in right??
+      {!formik.isSubmitting ? (
         <form onSubmit={formik.handleSubmit}>
           <Textarea
             rows={2}

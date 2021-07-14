@@ -23,10 +23,11 @@ export default NextAuth({
     // Providers.Instagram({})
   ],
   // SQL or MongoDB database (or leave empty)
-  database: "",
-  debug: false,
+  database: process.env.MONGODB_URI,
+  debug: true,
   callbacks: {
     session: async (session: Session, user: Profile) => {
+      console.log(session.id, user.id)
       session.id = user.id
       return Promise.resolve(session)
     }
