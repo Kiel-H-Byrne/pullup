@@ -15,10 +15,8 @@ interface Props {
 
 export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
   const [session, loading] = useSession();
-  console.log(session.user)
   const formik = useFormik({
     initialValues: {
-      // uid,
       message: "",
     } as any,
     validate: async (values: PullUp) => {
@@ -45,7 +43,7 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
       const submit_data = {
         ...values,
         userName,
-        // uid,
+        uid,
         location: {
           lat: locationData.coords.latitude,
           lng: locationData.coords.longitude,
