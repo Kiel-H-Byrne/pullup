@@ -17,9 +17,9 @@ export async function connectToDatabase() {
     // @ts-ignore
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    maxIdleTimeMS: 10000,
-    serverSelectionTimeoutMS: 10000,
-    socketTimeoutMS: 20000
+    // maxIdleTimeMS: 10000,
+    // serverSelectionTimeoutMS: 10000,
+    // socketTimeoutMS: 20000
   });
 
   // Create new db instance; Specify which database we want to use is optional
