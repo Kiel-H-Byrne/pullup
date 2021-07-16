@@ -5,6 +5,7 @@ import axios from "axios";
 import { PullUp } from "../types";
 import { Box, Button, CircularProgress, Text, Textarea } from "@chakra-ui/react";
 import { signin, useSession } from "next-auth/client";
+import { getTruncated } from "../util/helpers";
 
 interface Props {
   onClose: () => void;
@@ -34,7 +35,6 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
       //show x or check, if wrong, get accurate point. if right, show modal
       //load modal w/ form
       //on form submit, place pin on map, pan to new pin, wait, pan back to user's location
-      const getTruncated = (float: number) => Math.trunc(float);
 
       const apiUri = `api/pullups?lat=${getTruncated(
         locationData.coords.latitude

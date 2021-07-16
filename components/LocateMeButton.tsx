@@ -1,5 +1,5 @@
 import { Icon, IconButton } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { GLocation } from '../types';
 import { findClosestMarker, targetClient } from '../util/helpers';
 import { MdMyLocation } from 'react-icons/md'
@@ -25,12 +25,12 @@ export const LocateMeButton = (props: Props) => {
     };
   }, [geoWatchId, clientLocation]);
   const handleClick = () => {
-    const googleWindow: typeof google  = (window as any).google;
+    const googleWindow: typeof google = (window as any).google;
     //when clicked, find users location. keep finding every x minutes or as position changes. if position doesn't change after x minutes. turn off
     //zoom to position
     //calculate closest listing(s)
     //when user clicks again, turn tracking off.
-    let oldMarker: google.maps.Marker 
+    let oldMarker: google.maps.Marker;
     if (!geoWatchId) {
       const location = window.navigator && window.navigator.geolocation;
       if (location) {
@@ -52,7 +52,7 @@ export const LocateMeButton = (props: Props) => {
               setClientMarker(marker);
             } else {
               //MARKER EXISTS, SO WE MOVE IT TO NEW POSITION.
-             clientMarker.setMap(mapInstance);
+              clientMarker.setMap(mapInstance);
               clientMarker.setPosition(positionObject);
             }
             setClientLocation(positionObject);
@@ -78,7 +78,7 @@ export const LocateMeButton = (props: Props) => {
             console.warn(error);
             setClientLocation({
               latitude: null,
-              longitude: null
+              longitude: null,
             });
           },
           {
@@ -89,10 +89,12 @@ export const LocateMeButton = (props: Props) => {
         );
         setGeoWatchId(watchId);
       } else {
-        console.log('geolocation is not available')
+        console.log("geolocation is not available");
       }
     }
+    //center marker in window
     clientLocation && targetClient(mapInstance, clientLocation);
+    //toggle some view
     !toggleDisplay ? setToggleDisplay(true) : setToggleDisplay(false);
   };
 
@@ -112,7 +114,6 @@ export const LocateMeButton = (props: Props) => {
         <Icon as={MdMyLocation} />
       </IconButton>
       {/* {(closestListing && toggleDisplay) && <ClosestCard closestListing={closestListing}/>} */}
-      {/* {(closestListing && toggleDisplay) && <ClosestList closestListing={closestListing}/>} */}
     </>
   );
 }

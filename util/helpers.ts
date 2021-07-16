@@ -41,3 +41,6 @@ export const findClosestMarker = function (
   const closestMarker = markers[closest];
   return closestMarker;
 };
+
+export const getTruncated = (float: number) => Math.trunc(float);
+

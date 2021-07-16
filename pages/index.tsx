@@ -3,6 +3,7 @@ import { Layout, LocateMeButton, PullUpButton } from "../components";
 import { Loader } from "@googlemaps/js-api-loader";
 import { MAP_STYLES } from "../util/constants";
 import { useState } from "react";
+import { MarkersLayer } from "../components/MarkersLayer";
 
 const mapCenter = { lat: -34.397, lng: 150.644 };
 
@@ -56,6 +57,8 @@ const IndexPage = () => {
     <>
       <Layout title="Pull Up!">
         <div id="map" ref={googlemap} />
+        <MarkersLayer mapInstance={mapInstance}  />
+        {/* <MarkerInfo /> */}
         <PullUpButton mapInstance={mapInstance} />
         <LocateMeButton mapInstance={mapInstance} />
       </Layout>
