@@ -6,15 +6,17 @@ import { MdMyLocation } from 'react-icons/md'
 
 interface Props {
   mapInstance: google.maps.Map | google.maps.StreetViewPanorama;
+  setClientLocation: any //a usestate fxn returning {latlng};
+  clientLocation: GLocation
 }
 
 export const LocateMeButton = (props: Props) => {
-  const [clientLocation, setClientLocation] = useState(null);
+  // const [clientLocation, setClientLocation] = useState(null); //hoisted 
   const [closestListing, setClosestListing] = useState(null);
   const [geoWatchId, setGeoWatchId] = useState(0);
   const [clientMarker, setClientMarker] = useState(null);
   const [toggleDisplay, setToggleDisplay] = useState(false);
-  const { mapInstance } = props;
+  const { mapInstance, setClientLocation, clientLocation } = props;
   useEffect(() => {
     //pan map to new center every new lat/long
     //do nothing, then cleanup

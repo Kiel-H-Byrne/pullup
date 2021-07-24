@@ -1,7 +1,7 @@
-import { Button, Center, Icon, IconButton, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure } from '@chakra-ui/react';
+import { Button, Center, Icon, IconButton, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, useDisclosure } from '@chakra-ui/react';
 import { signIn, useSession } from 'next-auth/client';
 import React, { useState } from 'react'
-import { BiMessageAltAdd } from 'react-icons/bi';
+import { BiMapPin, BiMessageAltAdd } from 'react-icons/bi';
 import { PullUpForm } from "./";
 
 interface Props {
@@ -48,9 +48,15 @@ export const PullUpButton = (props: Props) => {
       <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
         <ModalOverlay />
         <ModalContent>
-          {!loading && session ? (
+          {!loading && session && locationData.coords ? (
             <>
-              <ModalHeader>Pull Up!</ModalHeader>
+              <ModalHeader>
+                <Text fontSize="2xl">Pull Up!</Text>
+                <Text fontSize="xx-small" fontColor="grey">
+                  <Icon as={BiMapPin} /> @{locationData.coords.latitude},
+                  {locationData.coords.longitude}
+                </Text>
+              </ModalHeader>
               <ModalCloseButton />
               <ModalBody>
                 <PullUpForm

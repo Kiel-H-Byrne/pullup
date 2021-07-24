@@ -4,25 +4,46 @@ import { GLocation, PullUp } from "../types";
 //@ts-ignore
 export async function getPullUps(
   db: Db,
-  from: GLocation,
-  by: string,
-  limit: number
+  from?: GLocation,
+  by?: string,
+  limit?: number
 ) {
   return (
     db
       .collection("pullups")
       .find({
         // Pagination: Fetch pullups that match specific lat/long
-        ...(from && {
-          "location.lat": from.lat,
-          "location.lng": from.lng,
-        }),
-        ...(by && { creatorId: by }),
+        // ...(from && {
+        //   "location.lat": from.lat,
+        //   "location.lng": from.lng,
+        // }),
+        // ...(by && { creatorId: by }),
       })
       // .sort({ location: -1 })
-      .limit(limit)
+      // .limit(limit)
       .toArray()
   );
+}
+
+export async function getPullupsNearBy(
+  db: Db,
+  from: GLocation,
+  by: string,
+  limit: number
+) {
+  return db
+    .collection("pullups")
+    .find({
+      location: {
+        $near: {
+          $geometry: { type: "Point", coordinates: [from.lng, from.lat] },
+          $minDistance: 1000,
+          $maxDistance: 5000,
+        },
+      },
+    })
+    .limit(limit)
+    .toArray();
 }
 
 export async function findPullUpById(db: Db, pullupId: string) {
@@ -35,14 +56,15 @@ export async function findPullUpById(db: Db, pullupId: string) {
 }
 
 export async function insertPullUp(db: Db, data: PullUp) {
-  return db.collection("pullups").insertOne({
-    ...data,
-  })
-  .then(({ insertedId }) => insertedId);
+  return db
+    .collection("pullups")
+    .insertOne({
+      ...data,
+    })
+    .then(({ insertedId }) => insertedId);
 }
 
 export async function updatePullUpById(db: Db, id: string, update: object) {
-  console.log(id);
   return db
     .collection("pullups")
     .findOneAndUpdate({ _id: id }, { $set: update })

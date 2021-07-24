@@ -9,6 +9,7 @@ const mapCenter = { lat: -34.397, lng: 150.644 };
 
 const IndexPage = () => {
   const googlemap = useRef(null);
+  const [clientLocation, setClientLocation] = useState(null);
   const [mapInstance, setMapInstance] = useState(null);
 
   useEffect(() => {
@@ -21,7 +22,7 @@ const IndexPage = () => {
       const mapOptions = {
         center: new google.maps.LatLng(mapCenter),
         zoom: 11,
-        minZoom: 10,
+        minZoom: 4,
         maxZoom: 14,
         // mapTypeId:google.maps.MapTypeId.TERRAIN,
         backgroundColor: "#555",
@@ -57,10 +58,10 @@ const IndexPage = () => {
     <>
       <Layout title="Pull Up!">
         <div id="map" ref={googlemap} />
-        <MarkersLayer mapInstance={mapInstance}  />
+        <MarkersLayer mapInstance={mapInstance} clientLocation={clientLocation} />
         {/* <MarkerInfo /> */}
         <PullUpButton mapInstance={mapInstance} />
-        <LocateMeButton mapInstance={mapInstance} />
+        <LocateMeButton mapInstance={mapInstance} clientLocation={clientLocation}  setClientLocation={setClientLocation}/>
       </Layout>
     </>
   );

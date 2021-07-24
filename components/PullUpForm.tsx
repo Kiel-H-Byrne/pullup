@@ -45,8 +45,8 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
         userName,
         uid,
         location: {
-          lat: locationData.coords.latitude,
           lng: locationData.coords.longitude,
+          lat: locationData.coords.latitude,
         },
         timestamp: new Date(locationData.timestamp),
       };
