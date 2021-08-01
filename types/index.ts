@@ -1,6 +1,7 @@
 export interface GLocation { lat: number, lng: number }
 
 export interface PullUp {
+  _id: any;
   pid: string;
   uid: string;
   userName: string;

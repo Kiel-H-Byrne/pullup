@@ -15,17 +15,32 @@ const InfoWindow = () => <Box width="container.sm">InfoWIndow Content</Box>;
 
 export const MarkersLayer = (props: Props) => {
   const { mapInstance, clientLocation } = props;
-  const [infoWindow, setInfoWindow] = useState(null)
-  const createInfoWindow = () => {
-    setInfoWindow(new (window as any).google.maps.InfoWindow({
-      content: '<div id="infoWindow" />',
-      position: {...clientLocation, lat: clientLocation.lat-.05},
-    }));
-    infoWindow.addListener("domready", () => {
-      render(<InfoWindow />, document.getElementById("infoWindow"));
-    });
+  const [infoContent, setInfoContent] = useState('')
+
+  const infoWindow = new (window as any).google.maps.InfoWindow({
+    content: infoContent,
+    // content: '<div id="infoWindow" />',
+    // maxWidth:
+    position: {lat: 0, lng: 0}
+  })
+
+  const updateInfoWindow = (content: string, marker: google.maps.Marker) => {
+    // infoWindow.setContent(content)
+    setInfoContent(content)
+    infoWindow.open({
+      anchor: marker,
+      map: mapInstance,
+      shouldFocus: true,
+      
+    })
+      // position: {...clientLocation, lat: clientLocation.lat-.05},
+    // }));
+    // infoWindow.addListener("domready", () => {
+    //   render(<InfoWindow />, document.getElementById("infoWindow"));
+    // });
     infoWindow.open(mapInstance);
   };
+
   if (!clientLocation) {
     return null;
   } else {
@@ -42,7 +57,7 @@ export const MarkersLayer = (props: Props) => {
           // icon:
         });
         marker.addListener("click", () => {
-          createInfoWindow();
+          updateInfoWindow(el.message, marker);
         });
       });
     //display on map

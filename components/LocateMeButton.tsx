@@ -51,6 +51,16 @@ export const LocateMeButton = (props: Props) => {
                 title: "My Location",
                 // animation: googleWindow.maps.Animation.BOUNCE,
               });
+              const clientRadius = new googleWindow.maps.Circle({
+                map: mapInstance as google.maps.Map,
+                center: new googleWindow.maps.LatLng(positionObject),
+                radius: 2 * 1609.34,
+                strokeColor: "#FF7733",
+                strokeOpacity: 0.2,
+                strokeWeight: 2,
+                fillColor: "#FFAA00",
+                fillOpacity: 0.1,
+              });
               setClientMarker(marker);
             } else {
               //MARKER EXISTS, SO WE MOVE IT TO NEW POSITION.

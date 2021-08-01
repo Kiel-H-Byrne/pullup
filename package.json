@@ -20,6 +20,7 @@
     "@emotion/react": "^11.4.0",
     "@emotion/styled": "^11.3.0",
     "@googlemaps/js-api-loader": "^1.12.1",
+    "@react-google-maps/api": "^2.2.0",
     "axios": "^0.21.1",
     "date-fns": "^2.22.1",
     "formik": "^2.2.9",
