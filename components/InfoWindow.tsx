@@ -2,10 +2,14 @@ import React from "react";
 import { InfoWindow } from "@react-google-maps/api";
 import { PullUp } from "../types";
 import { Box, Progress, Text } from "@chakra-ui/react";
+import { useSession } from "next-auth/client";
+import { InteractiveUserName } from "./InteractiveUserName";
 
 const MyInfoWindow = ({ activeData }: { activeData: PullUp }) => {
-  const { location } = activeData;
-  // let loc = location.split(",");
+  const { location, uid, userName } = activeData;
+  const [session, loading] = useSession()
+  console.log(activeData.uid)
+// let loc = location.split(",");
   // let locObj = { lat: parseFloat(loc[0]), lng: parseFloat(loc[1]) };
 
   return (
@@ -18,7 +22,8 @@ const MyInfoWindow = ({ activeData }: { activeData: PullUp }) => {
     >
       {activeData ? (
         <div className={""}>
-          <Box><Text >{activeData.message}</Text></Box>
+          <Box>
+            <InteractiveUserName uid={uid} userName={userName} /><Text >{activeData.message}</Text></Box>
         </div>
       ) : (
         <Progress />
