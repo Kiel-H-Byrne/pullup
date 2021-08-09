@@ -9,22 +9,20 @@ const MyInfoWindow = ({ activeData }: { activeData: PullUp }) => {
   const { location, uid, userName } = activeData;
   const [session, loading] = useSession()
   console.log(activeData.uid)
-// let loc = location.split(",");
+  // let loc = location.split(",");
   // let locObj = { lat: parseFloat(loc[0]), lng: parseFloat(loc[1]) };
 
   return (
     <InfoWindow
       position={location}
       options={{
-        pixelOffset: { height: -40, width: 0, equals: void(0)},
+        pixelOffset: { height: -40, width: 0, equals: void (0) },
         disableAutoPan: true,
       }}
     >
       {activeData ? (
-        <div className={""}>
-          <Box>
-            <InteractiveUserName uid={uid} userName={userName} /><Text >{activeData.message}</Text></Box>
-        </div>
+        <Box>
+          <InteractiveUserName uid={uid} userName={userName} /><Text >{activeData.message}</Text></Box>
       ) : (
         <Progress />
       )}
