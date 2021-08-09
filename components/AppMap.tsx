@@ -143,8 +143,9 @@ const AppMap = memo(({
         {pullups && (
           <MarkerClusterer
             styles={clusterStyles}
+            enableRetinaIcons
             // onClick={(event) =>{console.log(event.getMarkers())}}
-            gridSize={3}
+            gridSize={2} 
             // minimumClusterSize={3}
           >
             {(clusterer) =>

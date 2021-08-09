@@ -5,7 +5,7 @@ export const targetClient = function (map: any, pos: any) {
   // ZOOM TO CERTAIN LEVEL
   map.panTo(pos);
   // google.maps.event.trigger(map, 'resize');
-  map.setZoom(12);
+  map.setZoom(17);
 };
 
 export const toPositionObj = (location: string | undefined) => {

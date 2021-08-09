@@ -21,7 +21,6 @@ const IndexPage = () => {
           setMapInstance={setMapInstance}
         />
         {/* <MarkerInfo /> */}
-        <PullUpButton mapInstance={mapInstance} />
         <LocateMeButton
           mapInstance={mapInstance}
           clientLocation={clientLocation}

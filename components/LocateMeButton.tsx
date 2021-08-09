@@ -1,8 +1,11 @@
-import { Icon, IconButton } from '@chakra-ui/react';
+import { Button, Center, Icon, IconButton, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Text, useDisclosure } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { GLocation } from '../types';
 import { findClosestMarker, targetClient } from '../util/helpers';
 import { MdMyLocation } from 'react-icons/md'
+import { BiMapPin, BiMessageAltAdd } from 'react-icons/bi';
+import { signIn, useSession } from 'next-auth/client';
+import { PullUpForm } from './PullUpForm';
 
 interface Props {
   mapInstance: google.maps.Map | google.maps.StreetViewPanorama;
@@ -12,10 +15,12 @@ interface Props {
 
 export const LocateMeButton = (props: Props) => {
   // const [clientLocation, setClientLocation] = useState(null); //hoisted 
+  const { isOpen, onOpen, onClose } = useDisclosure()
   const [closestListing, setClosestListing] = useState(null);
   const [geoWatchId, setGeoWatchId] = useState(0);
   const [clientMarker, setClientMarker] = useState(null);
   const [toggleDisplay, setToggleDisplay] = useState(false);
+  const [session, loading] = useSession();
   const { mapInstance, setClientLocation, clientLocation } = props;
   useEffect(() => {
     //pan map to new center every new lat/long
@@ -109,7 +114,10 @@ export const LocateMeButton = (props: Props) => {
     //toggle some view
     !toggleDisplay ? setToggleDisplay(true) : setToggleDisplay(false);
   };
-
+  const handleOpen =() => {
+    handleClick()
+    onOpen()
+  }
   return (
     <>
       <IconButton
@@ -125,6 +133,48 @@ export const LocateMeButton = (props: Props) => {
       >
         <Icon as={MdMyLocation} />
       </IconButton>
+      <IconButton
+        position="absolute"
+        bottom="10rem"
+        right="10px"
+        borderRadius="50%"
+        colorScheme="yellow"
+        aria-label="Add PullUp"
+        onClick={handleOpen}
+      >
+        <Icon as={BiMessageAltAdd} />
+      </IconButton>
+      <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
+        <ModalOverlay />
+        <ModalContent>
+          {!loading && session ? (
+            <>
+              <ModalHeader>
+                <Text fontSize="2xl">Pull Up!</Text>
+                <Text fontSize="xx-small" fontColor="grey">
+                  <Icon as={BiMapPin} /> @{clientLocation?.lat},
+                  {clientLocation?.lng}
+                </Text>
+              </ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <PullUpForm
+                  onClose={onClose}
+                  locationData={clientLocation}
+                  uid={session.id as string}
+                  userName={session.user.name}
+                />
+              </ModalBody>
+            </>
+          ) : (
+            <Center padding="22">
+              <Button onClick={() => signIn()}>Register / Log In</Button>
+            </Center>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* {(closestListing && toggleDisplay) && <ClosestList closestListing={closestListing}/>} */}
       {/* {(closestListing && toggleDisplay) && <ClosestCard closestListing={closestListing}/>} */}
     </>
   );
