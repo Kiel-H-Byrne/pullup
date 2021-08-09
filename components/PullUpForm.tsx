@@ -3,9 +3,11 @@ import { useFormik } from "formik";
 import { mutate } from "swr";
 import axios from "axios";
 import { PullUp } from "../types";
-import { Box, Button, CircularProgress, Text, Textarea } from "@chakra-ui/react";
+import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Button, Center, CircularProgress, Flex, Text, Textarea } from "@chakra-ui/react";
 import { signin, useSession } from "next-auth/client";
 import { getTruncated } from "../util/helpers";
+import VideoRecorder from 'react-video-recorder'
+import { useState } from "react";
 
 interface Props {
   onClose: () => void;
@@ -14,8 +16,13 @@ interface Props {
   userName: string;
 }
 
+const onRecFinish = (videoBlob: string) => {
+  console.log('videoBlob', videoBlob)
+}
+
 export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
   const [session, loading] = useSession();
+  const [allowRecord, setAllowRecord ]   = useState(false)
   const formik = useFormik({
     initialValues: {
       message: "",
@@ -69,17 +76,38 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
     <Box marginInline="3">
       {!formik.isSubmitting ? (
         <form onSubmit={formik.handleSubmit}>
-          <Textarea
-            rows={2}
-            id="message"
-            name="message"
-            onChange={formik.handleChange}
-          />
+          <Accordion defaultIndex={[0]} allowMultiple>
+            <AccordionItem>
+              <AccordionButton textAlign="center">
+                <Flex m={"0 auto"}>COMMENT</Flex>
+              </AccordionButton>
+              <AccordionPanel>
+
+                <Textarea
+                  rows={2}
+                  id="message"
+                  name="message"
+                  onChange={formik.handleChange}
+                />
+              </AccordionPanel>
+            </AccordionItem>
+            <AccordionItem>
+              <AccordionButton onClick={() => { setAllowRecord(true) }}>
+                <Flex m={"0 auto"} >RECORD</Flex>
+              </AccordionButton>
+              <AccordionPanel>
+
+                {allowRecord && <VideoRecorder
+                  onRecordingComplete={onRecFinish} isOnInitially/>}
+              </AccordionPanel>
+            </AccordionItem>
+          </Accordion>
           {formik.errors ? (
             <Text as="p" color="red" textAlign="center">
               {formik.errors.message}
             </Text>
           ) : null}
+
           {session ? (
             <Button type="submit">Post</Button>
           ) : (
@@ -92,3 +120,33 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
     </Box>
   );
 };
+
+/**
+ * <VideoRecorder
+ chunkSize={250}
+  constraints={{
+    audio: true,
+    video: true
+  }}
+  countdownTime={3000}
+  dataAvailableTimeout={500}
+  isFlipped
+  isOnInitially
+  mimeType={undefined}
+  onError={function noRefCheck(){}}
+  onOpenVideoInput={function noRefCheck(){}}
+  onRecordingComplete={function noRefCheck(){}}
+  onStartRecording={function noRefCheck(){}}
+  onStopRecording={function noRefCheck(){}}
+  onStopReplaying={function noRefCheck(){}}
+  onTurnOffCamera={function noRefCheck(){}}
+  onTurnOnCamera={function noRefCheck(){}}
+  renderActions={function noRefCheck(){}}
+  renderDisconnectedView={function noRefCheck(){}}
+  renderErrorView={function noRefCheck(){}}
+  renderLoadingView={function noRefCheck(){}}
+  renderUnsupportedView={function noRefCheck(){}}
+  renderVideoInputView={function noRefCheck(){}}
+  t={function noRefCheck(){}}
+  timeLimit={undefined}
+ */
