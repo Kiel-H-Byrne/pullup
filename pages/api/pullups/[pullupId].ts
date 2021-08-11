@@ -8,7 +8,7 @@ export default async (req: any, res: any) => {
   const {
     //@ts-ignore
     //can send query params to sort & limit results
-    query: { id, name, oid, limit, from },
+    query: { pullupId, name, oid, limit, from },
     method,
   } = req;
   // console.log(req.query)
@@ -17,7 +17,7 @@ export default async (req: any, res: any) => {
       const pullups = await getPullUps(
         db,
         req.query.from && {lat: 0,lng: 0},
-        req.query.pid,
+        pullupId,
         req.query.limit ? parseInt(req.query.limit, 10) : undefined
       );
 

@@ -6,7 +6,6 @@ const maxAge = 1 * 24 * 60 * 60;
 const pullupHandler = async (req: any, res: any) => {
   const db = await connectToDatabase();
   db.createIndex("pullups", { location: "2dsphere" });
-
   const {
     //@ts-ignore
     //can send query params to sort & limit results

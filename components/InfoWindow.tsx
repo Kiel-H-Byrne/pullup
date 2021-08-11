@@ -8,7 +8,6 @@ import { InteractiveUserName } from "./InteractiveUserName";
 const MyInfoWindow = ({ activeData }: { activeData: PullUp }) => {
   const { location, uid, userName } = activeData;
   const [session, loading] = useSession()
-  console.log(activeData.uid)
   // let loc = location.split(",");
   // let locObj = { lat: parseFloat(loc[0]), lng: parseFloat(loc[1]) };
 
