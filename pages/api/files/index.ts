@@ -34,12 +34,12 @@ export default async function uploadHandler(req: any, res: any) {
       }
       break
 
-    case "POST":
-      console.log('in here')
-      console.log(req.body.data)
-      const blob = req.body.data as Blob
+    case "PUT":
+      console.log(req.body)
+      const blob = req.body.blob as Blob
       try {
-        bucket.openUploadStream(req.body.data.fileName, {
+        if (!blob) throw Error('no object')
+        bucket.openUploadStream(req.body.fileName, {
           chunkSizeBytes: blob.size,
           metadata: { type: blob.type }
         }).
@@ -50,8 +50,8 @@ export default async function uploadHandler(req: any, res: any) {
             console.log('done!');
           }).write(await blob.arrayBuffer());
       } catch (error) {
-        console.warn('danger will rob')
-        console.warn(error)
+        console.warn('danger will robinson')
+        res.send(error)
       }
       break
     default:

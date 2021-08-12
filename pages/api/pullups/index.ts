@@ -14,7 +14,8 @@ const pullupHandler = async (req: any, res: any) => {
   } = req;
   switch (method) {
     case "GET":
-      console.log(typeof lat, typeof lng)
+      console.log("getting pullups near:")
+      console.log( lat, lng)
       const pullups =
         lat && lng
           ? await getPullupsNearBy(
