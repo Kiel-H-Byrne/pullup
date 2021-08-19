@@ -21,6 +21,8 @@
     "@emotion/styled": "^11.3.0",
     "@react-google-maps/api": "^2.2.0",
     "axios": "^0.21.1",
+    "cloudinary": "^1.26.3",
+    "cloudinary-react": "^1.7.0",
     "date-fns": "^2.22.1",
     "formik": "^2.2.9",
     "framer-motion": "^4.1.17",

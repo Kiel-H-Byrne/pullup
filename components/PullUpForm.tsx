@@ -51,8 +51,18 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
       )}&lng=${getTruncated(locationData.lng)}`;
 
       const FILE_NAME = `${session.id}_${new Date().getTime()}_${locationData.lng.toString().slice(7)}${locationData.lat.toString().slice(7)}`
-      const fileUri = `/api/files/${FILE_NAME}`
+      // const fileUri = `/api/files/${FILE_NAME}`
+      const fileUri = `https://api.cloudinary.com/v1_1/pulupklowd/upload`
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = async () => {
+        let base64data = reader.result;
+        mutate(
+          apiUri,
+          await axios.put(fileUri, {file: base64data}));
+      }
       helpers.setSubmitting(true);
+
       const submit_data = {
         ...values,
         userName,
@@ -67,12 +77,6 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
       };
       mutate(apiUri, submit_data, false); //should i put mutate here or after the post with no options.
       // console.log(blob)
-      mutate(
-        apiUri,
-        await axios.put(fileUri, blob, {
-          // headers: { "content-type": blob.type }
-          headers: { 'Content-Type': `multipart/form-data; boundary=${blob._boundary}` }
-        }));
       mutate(
         apiUri,
         await axios.post(apiUri, {
