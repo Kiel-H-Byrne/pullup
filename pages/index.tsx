@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Layout, LocateMeButton, PullUpButton } from "../components";
+import { Layout, LocateMeButton } from "../components";
 import { MAP_STYLES } from "../util/constants";
 import { useState } from "react";
 import { MarkersLayer } from "../components/MarkersLayer";
@@ -21,7 +21,6 @@ const IndexPage = () => {
           setMapInstance={setMapInstance}
         />
         {/* <MarkerInfo /> */}
-        <PullUpButton mapInstance={mapInstance} />
         <LocateMeButton
           mapInstance={mapInstance}
           clientLocation={clientLocation}

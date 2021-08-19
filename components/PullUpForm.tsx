@@ -1,28 +1,31 @@
 import React from "react";
 import { useFormik } from "formik";
-import { mutate } from "swr";
+import useSWR, { mutate } from "swr";
 import axios from "axios";
-import { PullUp } from "../types";
+import { GLocation, PullUp } from "../types";
 import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Button, Center, CircularProgress, Flex, Text, Textarea } from "@chakra-ui/react";
 import { signin, useSession } from "next-auth/client";
 import { getTruncated } from "../util/helpers";
 import VideoRecorder from 'react-video-recorder'
 import { useState } from "react";
+import fetcher from "../util/fetch";
 
 interface Props {
   onClose: () => void;
-  locationData: any;
+  locationData: GLocation;
   uid: string;
   userName: string;
 }
 
-const onRecFinish = (videoBlob: string) => {
-  console.log('videoBlob', videoBlob)
-}
 
 export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
   const [session, loading] = useSession();
-  const [allowRecord, setAllowRecord ]   = useState(false)
+  const [allowRecord, setAllowRecord] = useState(false)
+  const [blob, setBlob] = useState(null as Blob)
+  const onRecFinish = (videoBlob: Blob) => {
+    // console.log('videoBlob', videoBlob)
+    setBlob(videoBlob)
+  }
   const formik = useFormik({
     initialValues: {
       message: "",
@@ -44,21 +47,32 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
       //on form submit, place pin on map, pan to new pin, wait, pan back to user's location
 
       const apiUri = `api/pullups?lat=${getTruncated(
-        locationData.coords.latitude
-      )}&lng=${getTruncated(locationData.coords.longitude)}`;
+        locationData.lat
+      )}&lng=${getTruncated(locationData.lng)}`;
+
+      const FILE_NAME = `${session.id}_${new Date().getTime()}_${locationData.lng.toString().slice(7)}${locationData.lat.toString().slice(7)}`
+      const fileUri = `/api/files/${FILE_NAME}`
       helpers.setSubmitting(true);
       const submit_data = {
         ...values,
         userName,
         uid,
         location: {
-          lng: locationData.coords.longitude,
-          lat: locationData.coords.latitude,
+          lng: locationData.lng,
+          lat: locationData.lat,
         },
-        timestamp: new Date(locationData.timestamp),
+        fileName: FILE_NAME,
+        // media: blob && await blob.arrayBuffer(),
+        timestamp: new Date(),
       };
       mutate(apiUri, submit_data, false); //should i put mutate here or after the post with no options.
-      console.log(submit_data)
+      // console.log(blob)
+      mutate(
+        apiUri,
+        await axios.put(fileUri, blob, {
+          // headers: { "content-type": blob.type }
+          headers: { 'Content-Type': `multipart/form-data; boundary=${blob._boundary}` }
+        }));
       mutate(
         apiUri,
         await axios.post(apiUri, {
@@ -75,7 +89,7 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
   return (
     <Box marginInline="3">
       {!formik.isSubmitting ? (
-        <form onSubmit={formik.handleSubmit}>
+        <form onSubmit={formik.handleSubmit} encType="multipart/form-data">
           <Accordion defaultIndex={[0]} allowMultiple>
             <AccordionItem>
               <AccordionButton textAlign="center">
@@ -98,7 +112,8 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
               <AccordionPanel>
 
                 {allowRecord && <VideoRecorder
-                  onRecordingComplete={onRecFinish} isOnInitially/>}
+                  onRecordingComplete={onRecFinish} isOnInitially countdownTime={0}
+                />}
               </AccordionPanel>
             </AccordionItem>
           </Accordion>
