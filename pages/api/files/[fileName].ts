@@ -58,10 +58,9 @@ export default async function fileHandler(req: NextApiRequest, res: NextApiRespo
       try {
         const file = req.body.data;
         console.log("----------------file----------------------")
-        const file_uri = await cloudinary.v2.uploader.upload_stream(
+        const file_uri = await cloudinary.v2.uploader.upload(file,
           {
-            resource_type: 'video',
-            format: 'webm'
+            resource_type: 'auto',
           },
           function onEnd(error, result) {
             if (error) {
@@ -71,7 +70,7 @@ export default async function fileHandler(req: NextApiRequest, res: NextApiRespo
             console.log(result.secure_url)
             return result.secure_url
           }
-        ).end(file)
+        )
 
       } catch (error) {
         console.warn(error.code)
