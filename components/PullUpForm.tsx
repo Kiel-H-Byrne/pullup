@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useFormik } from "formik";
 import useSWR, { mutate } from "swr";
 import axios from "axios";
@@ -9,6 +9,7 @@ import { getTruncated } from "../util/helpers";
 import VideoRecorder from 'react-video-recorder'
 import { useState } from "react";
 import fetcher from "../util/fetch";
+import { createRef } from "react";
 
 interface Props {
   onClose: () => void;
@@ -21,10 +22,11 @@ interface Props {
 export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
   const [session, loading] = useSession();
   const [allowRecord, setAllowRecord] = useState(false)
-  const [blob, setBlob] = useState(null as Blob)
-  const onRecFinish = (videoBlob: Blob) => {
+  const [videoBlob, setVideoBlob] = useState(null as Blob)
+  const formRef = useRef(null)
+  const onRecFinish = (blob: Blob) => {
     // console.log('videoBlob', videoBlob)
-    setBlob(videoBlob)
+    setVideoBlob(blob)
   }
   const formik = useFormik({
     initialValues: {
@@ -45,23 +47,33 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
       //show x or check, if wrong, get accurate point. if right, show modal
       //load modal w/ form
       //on form submit, place pin on map, pan to new pin, wait, pan back to user's location
+      //upload and get URL for video blob
+      //set url to form values and submit
 
+      helpers.setSubmitting(true);
       const apiUri = `api/pullups?lat=${getTruncated(
         locationData.lat
       )}&lng=${getTruncated(locationData.lng)}`;
 
+      /** get FileURI fxn */
       const FILE_NAME = `${session.id}_${new Date().getTime()}_${locationData.lng.toString().slice(7)}${locationData.lat.toString().slice(7)}`
-      // const fileUri = `/api/files/${FILE_NAME}`
-      const fileUri = `https://api.cloudinary.com/v1_1/pulupklowd/upload`
+      const submitUri = `/api/files/${FILE_NAME}`
+      // const submitUri = `https://api.cloudinary.com/v1_1/pulupklowd/upload`
+      const fileData = /** ArrayBuffer or Data URI base64encoded */ videoBlob.arrayBuffer()
+      // const {data: fileURI, error} = useSWR(submitUri, 
+          // const res = await axios.put(submitUri, {
+          //   data: fileData,
+          // })
+          // console.log(res)
+          // )
       const reader = new FileReader();
-      reader.readAsDataURL(blob);
+      reader.readAsDataURL(videoBlob);
       reader.onloadend = async () => {
         let base64data = reader.result;
         mutate(
-          apiUri,
-          await axios.put(fileUri, {file: base64data}));
+          submitUri,
+          await axios.put(submitUri, { data: base64data }));
       }
-      helpers.setSubmitting(true);
 
       const submit_data = {
         ...values,
@@ -72,17 +84,25 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
           lat: locationData.lat,
         },
         fileName: FILE_NAME,
-        // media: blob && await blob.arrayBuffer(),
-        timestamp: new Date(),
+        // fileURI,
+        timestamp: new Date().toISOString(),
       };
+      // submit_data.append('userName', userName)
+      // submit_data.append('uid', uid)
+      // submit_data.append('location', JSON.stringify({
+      //       lng: locationData.lng,
+      //       lat: locationData.lat,
+      //     }))
+      // submit_data.append('fileName', FILE_NAME)
+      // submit_data.append('media', videoBlob)
+      // submit_data.append('timestamp', new Date().toISOString())
       mutate(apiUri, submit_data, false); //should i put mutate here or after the post with no options.
-      // console.log(blob)
-      mutate(
-        apiUri,
-        await axios.post(apiUri, {
-          data: submit_data,
-        })
-      );
+      // mutate(
+      //   apiUri,
+      //   await axios.post(apiUri, {
+      //     data: submit_data,
+      //   })
+      // );
       helpers.setSubmitting(false);
       helpers.resetForm({});
       helpers.setStatus({ success: true });
@@ -93,7 +113,7 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
   return (
     <Box marginInline="3">
       {!formik.isSubmitting ? (
-        <form onSubmit={formik.handleSubmit} encType="multipart/form-data">
+        <form onSubmit={formik.handleSubmit} encType="multipart/form-data" ref={formRef}>
           <Accordion defaultIndex={[0]} allowMultiple>
             <AccordionItem>
               <AccordionButton textAlign="center">

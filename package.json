@@ -22,8 +22,8 @@
     "@react-google-maps/api": "^2.2.0",
     "axios": "^0.21.1",
     "cloudinary": "^1.26.3",
-    "cloudinary-react": "^1.7.0",
     "date-fns": "^2.22.1",
+    "formidable": "^1.2.2",
     "formik": "^2.2.9",
     "framer-motion": "^4.1.17",
     "mongodb": "^3.5.9",
@@ -40,6 +40,7 @@
     "yup": "^0.32.9"
   },
   "devDependencies": {
+    "@types/formidable": "^1.2.3",
     "@types/google.maps": "^3.45.6",
     "@types/mongodb": "^3.6.20",
     "@types/node": "^16.0.1",

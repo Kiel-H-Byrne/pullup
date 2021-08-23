@@ -1,8 +1,6 @@
+
 import { GridFSBucket } from "mongodb";
 import { cachedBucket, connectToDatabase } from "../../../db";
-import FileName from "./[fileName]";
-
-
 
 export default async function uploadHandler(req: any, res: any) {
   const { method } = req
@@ -54,6 +52,7 @@ export default async function uploadHandler(req: any, res: any) {
         res.send(error)
       }
       break
+    
     default:
       res.status(400).json({ itemnotfound: "No file" })
       break
