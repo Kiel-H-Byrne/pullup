@@ -66,13 +66,28 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
           // })
           // console.log(res)
           // )
+        //client way
+      // const fd = new FormData();
       const reader = new FileReader();
       reader.readAsDataURL(videoBlob);
       reader.onloadend = async () => {
         let base64data = reader.result;
-        mutate(
+      //   fd.append('file', base64data.toString())
+      //   fd.append('upload_preset', 'fkc3ua7z')
+      //     let res = await fetch(
+      //       submitUri,
+      //     {
+      //         method: "post",
+      //         mode: "cors",
+      //         body: fd
+      //       }
+      //     ).then((res => console.log(res.json())))
+        //server way
+          mutate(
           submitUri,
-          await axios.put(submitUri, { data: base64data }));
+             await axios.put(submitUri, {data: base64data })
+        )
+          
       }
 
       const submit_data = {

@@ -4,6 +4,7 @@ import { cachedBucket, connectToDatabase } from "../../../db";
 import { uploadFile } from "../../../db/files";
 import fs from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { rejects } from 'node:assert';
 
 export default async function fileHandler(req: NextApiRequest, res: NextApiResponse) {
   const db = await connectToDatabase();
@@ -57,20 +58,21 @@ export default async function fileHandler(req: NextApiRequest, res: NextApiRespo
       try {
         const file = req.body.data;
         console.log("----------------file----------------------")
-        const response = await cloudinary.v2.uploader.upload(String(file), {
-          resource_type: 'video',
-          public_id: 'my-video',
-        }, (error, result) => {
-          if (error) {
-          console.warn("error in here")
-          console.warn(error.code)
-          // res.status(400).json(error)
-          } else {
-            console.log("yay")
-            console.log(response)
+        const file_uri = await cloudinary.v2.uploader.upload_stream(
+          {
+            resource_type: 'video',
+            format: 'webm'
+          },
+          function onEnd(error, result) {
+            if (error) {
+              console.log(error)
+              return error
+            }
+            console.log(result.secure_url)
+            return result.secure_url
           }
-        })
-        // res.send(response)
+        ).end(file)
+
       } catch (error) {
         console.warn(error.code)
         // res.send(error)
