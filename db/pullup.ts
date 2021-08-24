@@ -38,7 +38,7 @@ export async function getPullupsNearBy(
         $near: {
           $geometry: { type: "Point", coordinates: [from.lng, from.lat] },
           $minDistance: 1, //over 1 meter
-          $maxDistance: 1610, //under 1 mile
+          $maxDistance: 2 * 1609.34, //under 2 mile
         },
       },
     })

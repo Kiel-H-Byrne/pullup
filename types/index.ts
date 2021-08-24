@@ -7,6 +7,14 @@ export interface PullUp {
   userName: string;
   message: string;
   location: GLocation;
-  timestamp: Date;
-  media?: object;
+  timestamp: string;
+  media?: {
+    uri: string,
+    fileName: string,
+    height: number,
+    width: number,
+    duration: number,
+    bytes: number,
+    type: string,
+  };
 }

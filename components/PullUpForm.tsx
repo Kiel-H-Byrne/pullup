@@ -1,15 +1,13 @@
 import React, { useRef } from "react";
 import { useFormik } from "formik";
-import useSWR, { mutate } from "swr";
+import { mutate } from "swr";
 import axios from "axios";
 import { GLocation, PullUp } from "../types";
 import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Button, Center, CircularProgress, Flex, Text, Textarea } from "@chakra-ui/react";
 import { signin, useSession } from "next-auth/client";
-import { getTruncated } from "../util/helpers";
 import VideoRecorder from 'react-video-recorder'
 import { useState } from "react";
-import fetcher from "../util/fetch";
-import { createRef } from "react";
+import { UploadApiResponse } from "cloudinary";
 
 interface Props {
   onClose: () => void;
@@ -51,44 +49,24 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
       //set url to form values and submit
 
       helpers.setSubmitting(true);
-      const apiUri = `api/pullups?lat=${getTruncated(
-        locationData.lat
-      )}&lng=${getTruncated(locationData.lng)}`;
-
+      const apiUri = `api/pullups?lat=${locationData.lat}&lng=${locationData.lng}`;
+      // const FILE_NAME = `${session.id}_${new Date().getTime()}_${locationData.lng.toString().slice(7)}${locationData.lat.toString().slice(7)}`
       /** get FileURI fxn */
-      const FILE_NAME = `${session.id}_${new Date().getTime()}_${locationData.lng.toString().slice(7)}${locationData.lat.toString().slice(7)}`
-      const submitUri = `/api/files/${FILE_NAME}`
-      // const submitUri = `https://api.cloudinary.com/v1_1/pulupklowd/upload`
-      const fileData = /** ArrayBuffer or Data URI base64encoded */ videoBlob.arrayBuffer()
-      // const {data: fileURI, error} = useSWR(submitUri, 
-          // const res = await axios.put(submitUri, {
-          //   data: fileData,
-          // })
-          // console.log(res)
-          // )
-        //client way
-      // const fd = new FormData();
-      const reader = new FileReader();
-      reader.readAsDataURL(videoBlob);
-      reader.onloadend = async () => {
-        let base64data = reader.result;
-      //   fd.append('file', base64data.toString())
-      //   fd.append('upload_preset', 'fkc3ua7z')
-      //     let res = await fetch(
-      //       submitUri,
-      //     {
-      //         method: "post",
-      //         mode: "cors",
-      //         body: fd
-      //       }
-      //     ).then((res => console.log(res.json())))
-        //server way
-          mutate(
-          submitUri,
-             await axios.put(submitUri, {data: base64data })
-        )
-          
-      }
+      const submitUri = `https://api.cloudinary.com/v1_1/pulupklowd/upload`
+      const fd = new FormData();
+      fd.append('file', videoBlob);
+      fd.append('upload_preset', 'fkc3ua7z')
+      let res = await fetch(
+        submitUri,
+        {
+          method: "post",
+          mode: "cors",
+          body: fd
+        }
+      )
+      let json = await res.json() as UploadApiResponse;
+      console.log(json)
+      const { secure_url, public_id, original_filename, duration, bytes, height, width, resource_type, format } = json;
 
       const submit_data = {
         ...values,
@@ -98,26 +76,21 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
           lng: locationData.lng,
           lat: locationData.lat,
         },
-        fileName: FILE_NAME,
-        // fileURI,
         timestamp: new Date().toISOString(),
+        media: {
+          uri: secure_url,
+          fileName: public_id,
+          type: resource_type,
+          height, width, duration, bytes, format
+        }
       };
-      // submit_data.append('userName', userName)
-      // submit_data.append('uid', uid)
-      // submit_data.append('location', JSON.stringify({
-      //       lng: locationData.lng,
-      //       lat: locationData.lat,
-      //     }))
-      // submit_data.append('fileName', FILE_NAME)
-      // submit_data.append('media', videoBlob)
-      // submit_data.append('timestamp', new Date().toISOString())
-      mutate(apiUri, submit_data, false); //should i put mutate here or after the post with no options.
-      // mutate(
-      //   apiUri,
-      //   await axios.post(apiUri, {
-      //     data: submit_data,
-      //   })
-      // );
+      mutate(apiUri, submit_data, false);
+      mutate(
+        apiUri,
+        await axios.post(apiUri, {
+          data: submit_data,
+        })
+      );
       helpers.setSubmitting(false);
       helpers.resetForm({});
       helpers.setStatus({ success: true });

@@ -1,10 +1,8 @@
 import { Box } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { render } from "react-dom";
 import useSWR from "swr";
 import { GLocation, PullUp } from "../types";
 import fetcher from "../util/fetch";
-import { getTruncated } from "../util/helpers";
 
 interface Props {
   mapInstance: google.maps.Map;

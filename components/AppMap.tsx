@@ -6,11 +6,12 @@ import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-ur
 import MyMarker from "./MyMarker";
 import MyInfoWindow from "./InfoWindow";
 import { GEOCENTER, MAP_STYLES } from "../util/constants";
-import { Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, useDisclosure } from "@chakra-ui/react";
+import { AspectRatio, Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Image, useDisclosure } from "@chakra-ui/react";
 import { GLocation, PullUp } from "../types";
+import { AdvancedVideo } from "@cloudinary/react";
 import useSWR from "swr";
 import fetcher from "../util/fetch";
-const LIBRARIES: Libraries = [ "places", "visualization", "geometry", "localContext"];
+const LIBRARIES: Libraries = ["places", "visualization", "geometry", "localContext"];
 
 const clusterStyles = [
   {
@@ -56,11 +57,11 @@ const clusterStyles = [
 ];
 
 const defaultProps = {
-  
+
   center: GEOCENTER,
   zoom: 5, //vs 11
   options: {
-  // mapTypeId:google.maps.MapTypeId.TERRAIN,
+    // mapTypeId:google.maps.MapTypeId.TERRAIN,
     backgroundColor: "#555",
     clickableIcons: false,
     disableDefaultUI: true,
@@ -100,14 +101,13 @@ interface IAppMap {
 const AppMap = memo(({
   clientLocation,
   setMapInstance,
-  mapInstance,
 }: IAppMap) => {
-  const { isOpen: isDrawerOpen, onOpen:setDrawerOpen, onClose:setDrawerClose } = useDisclosure()
-  const { isOpen: isWindowOpen, onToggle:toggleWindow, onClose:setWindowClose } = useDisclosure()
-  const [activeData, setActiveData] = useState(null);
+  const { isOpen: isDrawerOpen, onOpen: setDrawerOpen, onClose: setDrawerClose } = useDisclosure()
+  const { isOpen: isWindowOpen, onToggle: toggleWindow, onClose: setWindowClose } = useDisclosure()
+  const [activeData, setActiveData] = useState(null as PullUp);
 
   let { center, zoom, options } = defaultProps;
-  const uri = clientLocation  ? `api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}` : null;
+  const uri = clientLocation ? `api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}` : null;
 
   const { data, error } = useSWR(uri, fetcher);
   const pullups: PullUp[] = !error && data?.pullups;
@@ -145,8 +145,8 @@ const AppMap = memo(({
             styles={clusterStyles}
             enableRetinaIcons
             // onClick={(event) =>{console.log(event.getMarkers())}}
-            gridSize={2} 
-            // minimumClusterSize={3}
+            gridSize={2}
+          // minimumClusterSize={3}
           >
             {(clusterer) =>
               Object.values(pullups).map((data) => {
@@ -199,13 +199,18 @@ const AppMap = memo(({
             isOpen={isDrawerOpen}
             placement="left"
             onClose={setDrawerClose}
-            // mapInstance={mapInstance}
+          // mapInstance={mapInstance}
           >
             <DrawerOverlay />
             <DrawerContent>
               <DrawerCloseButton />
               <DrawerHeader>Info</DrawerHeader>
-              <DrawerBody>{activeData.message}</DrawerBody>
+              <DrawerBody>
+                <Box>
+                  {activeData.media && <RenderMedia media={activeData.media} />}
+                </Box>
+                {activeData.message}
+              </DrawerBody>
             </DrawerContent>
           </Drawer>
         )}
@@ -217,3 +222,25 @@ const AppMap = memo(({
 });
 
 export default AppMap;
+
+const RenderMedia = ({ media }: { media: PullUp['media'] }) => {
+  console.log(media)
+  if (media) {
+    switch (media.type) {
+      case "video":
+        return (<AspectRatio> <video controls><source src={media.uri} />Your browser does not support the video tag.</video></AspectRatio>);
+        break;
+      case "image":
+        return <Image src={media.uri} />;
+        break;
+      case "audio":
+        return <audio src={media.uri} />;
+        break;
+
+      default:
+        console.log(media.type)
+        return <div>Unrecognized Media</div>
+        break;
+    }
+  }
+};

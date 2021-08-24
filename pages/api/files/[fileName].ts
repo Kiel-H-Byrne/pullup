@@ -58,7 +58,7 @@ export default async function fileHandler(req: NextApiRequest, res: NextApiRespo
       try {
         const file = req.body.data;
         console.log("----------------file----------------------")
-        const file_uri = await cloudinary.v2.uploader.upload(file,
+        const file_uri = await cloudinary.v2.uploader.upload_large(file,
           {
             resource_type: 'auto',
           },
