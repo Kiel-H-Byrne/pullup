@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 import { Layout, LocateMeButton } from "../components";
 import { MAP_STYLES } from "../util/constants";
 import { useState } from "react";
-import { MarkersLayer } from "../components/MarkersLayer";
 import AppMap from "../components/AppMap";
 
 const mapCenter = { lat: -34.397, lng: 150.644 };

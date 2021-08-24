@@ -7,7 +7,7 @@ import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Button,
 import { signin, useSession } from "next-auth/client";
 import VideoRecorder from 'react-video-recorder'
 import { useState } from "react";
-import { UploadApiResponse } from "cloudinary";
+// import { UploadApiResponse } from "@cloudinary/base";
 
 interface Props {
   onClose: () => void;
@@ -64,7 +64,7 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
           body: fd
         }
       )
-      let json = await res.json() as UploadApiResponse;
+      let json = await res.json();
       console.log(json)
       const { secure_url, public_id, original_filename, duration, bytes, height, width, resource_type, format } = json;
 

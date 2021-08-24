@@ -11,6 +11,7 @@ import { GLocation, PullUp } from "../types";
 import { AdvancedVideo } from "@cloudinary/react";
 import useSWR from "swr";
 import fetcher from "../util/fetch";
+import { getTruncated } from "../util/helpers";
 const LIBRARIES: Libraries = ["places", "visualization", "geometry", "localContext"];
 
 const clusterStyles = [
@@ -108,6 +109,7 @@ const AppMap = memo(({
 
   let { center, zoom, options } = defaultProps;
   const uri = clientLocation ? `api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}` : null;
+  // const uri = clientLocation ? `api/pullups?lat=${getTruncated(clientLocation.lat)}&lng=${getTruncated(clientLocation.lng)}` : null;
 
   const { data, error } = useSWR(uri, fetcher);
   const pullups: PullUp[] = !error && data?.pullups;
@@ -223,7 +225,7 @@ const AppMap = memo(({
 
 export default AppMap;
 
-const RenderMedia = ({ media }: { media: PullUp['media'] }) => {
+const RenderMedia = ({ media, caption }: { media: PullUp['media'], caption: string }) => {
   console.log(media)
   if (media) {
     switch (media.type) {
