@@ -207,7 +207,7 @@ const AppMap = memo(({
               <DrawerHeader>Info</DrawerHeader>
               <DrawerBody>
                 <Box>
-                  {activeData.media && <RenderMedia media={activeData.media} />}
+                  {activeData.media && <RenderMedia media={activeData.media} caption={activeData.message.substr(0,11)}/>}
                 </Box>
                 {activeData.message}
               </DrawerBody>
