@@ -113,6 +113,11 @@ const AppMap = memo(({
 
   const { data, error } = useSWR(uri, fetcher);
   const pullups: PullUp[] = !error && data?.pullups;
+  const onClick = (e: any) => {
+console.log(e.markerClusterer.markers)
+//if gridsize is certain size; need to render an enumerated solution in infowindow 
+// (tab through cards of pins that sit on top of each other)
+  }
   return (
     // Important! Always set the container height explicitly via mapContainerClassName
     <LoadScript
@@ -145,10 +150,12 @@ const AppMap = memo(({
         {pullups && (
           <MarkerClusterer
             styles={clusterStyles}
+            averageCenter
             enableRetinaIcons
+            onClick={onClick}
             // onClick={(event) =>{console.log(event.getMarkers())}}
             gridSize={2}
-          // minimumClusterSize={3}
+          minimumClusterSize={1}
           >
             {(clusterer) =>
               Object.values(pullups).map((data) => {
@@ -178,8 +185,11 @@ const AppMap = memo(({
 
                   <MyMarker
                     key={`marker-${data._id}`}
+                    //what data can i set on marker?
                     //@ts-ignore
                     data={data}
+                    // label={}
+                    // title={}
                     clusterer={clusterer}
                     activeData={activeData}
                     setActiveData={setActiveData}
