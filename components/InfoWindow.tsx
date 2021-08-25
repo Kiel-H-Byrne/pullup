@@ -1,9 +1,9 @@
 import React from "react";
 import { InfoWindow } from "@react-google-maps/api";
 import { PullUp } from "../types";
-import { Box, Progress, Text } from "@chakra-ui/react";
+import { Box, Flex, Progress, Text } from "@chakra-ui/react";
 import { useSession } from "next-auth/client";
-import { InteractiveUserName } from "./InteractiveUserName";
+import { RenderMedia } from "./RenderMedia";
 
 const MyInfoWindow = ({ activeData }: { activeData: PullUp }) => {
   const { location, uid, userName } = activeData;
@@ -20,8 +20,11 @@ const MyInfoWindow = ({ activeData }: { activeData: PullUp }) => {
       }}
     >
       {activeData ? (
-        <Box>
-          <InteractiveUserName uid={uid} userName={userName} /><Text >{activeData.message}</Text></Box>
+        <Flex width="xs" direction="column">
+          {activeData.media && <RenderMedia media={activeData.media} options={{ title: activeData.message.substr(0, 11), autoplay: true, }} />}
+          <Text as="h2">{activeData.message}</Text>
+          <Text fontWeight="light" fontSize=".7rem" color="gray.300">{userName} </Text>
+        </Flex>
       ) : (
         <Progress />
       )}

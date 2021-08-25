@@ -8,9 +8,11 @@ import MyInfoWindow from "./InfoWindow";
 import { GEOCENTER, MAP_STYLES } from "../util/constants";
 import { AspectRatio, Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Image, useDisclosure } from "@chakra-ui/react";
 import { GLocation, PullUp } from "../types";
-import { AdvancedVideo } from "@cloudinary/react";
+import cloudinary from "cloudinary-core";
 import useSWR from "swr";
 import fetcher from "../util/fetch";
+import { InteractiveUserName } from "./InteractiveUserName";
+import { RenderMedia } from "./RenderMedia";
 const LIBRARIES: Libraries = ["places", "visualization", "geometry", "localContext"];
 
 const clusterStyles = [
@@ -153,7 +155,7 @@ const AppMap = memo(({
             onClick={onClick}
             // onClick={(event) =>{console.log(event.getMarkers())}}
             gridSize={2}
-          minimumClusterSize={1}
+            minimumClusterSize={3}
           >
             {(clusterer) =>
               Object.values(pullups).map((data) => {
@@ -217,9 +219,10 @@ const AppMap = memo(({
               <DrawerHeader>Info</DrawerHeader>
               <DrawerBody>
                 <Box>
-                  {activeData.media && <RenderMedia media={activeData.media} caption={activeData.message.substr(0,11)}/>}
+                  {activeData.media && <RenderMedia media={activeData.media} caption={activeData.message.substr(0, 11)} />}
                 </Box>
                 {activeData.message}
+                <InteractiveUserName userName={activeData.userName} uid={activeData.uid} />
               </DrawerBody>
             </DrawerContent>
           </Drawer>
@@ -232,25 +235,3 @@ const AppMap = memo(({
 });
 
 export default AppMap;
-
-const RenderMedia = ({ media, caption }: { media: PullUp['media'], caption: string }) => {
-  console.log(media)
-  if (media) {
-    switch (media.type) {
-      case "video":
-        return (<AspectRatio> <video controls><source src={media.uri} />Your browser does not support the video tag.</video></AspectRatio>);
-        break;
-      case "image":
-        return <Image src={media.uri} />;
-        break;
-      case "audio":
-        return <audio src={media.uri} />;
-        break;
-
-      default:
-        console.log(media.type)
-        return <div>Unrecognized Media</div>
-        break;
-    }
-  }
-};
