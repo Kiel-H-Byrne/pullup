@@ -218,7 +218,7 @@ const AppMap = memo(({
               <DrawerHeader>Info</DrawerHeader>
               <DrawerBody>
                 <Box>
-                  {activeData.media && <RenderMedia media={activeData.media} caption={activeData.message.substr(0, 11)} />}
+                  {activeData.media && <RenderMedia media={activeData.media} options={{title: activeData.message.substr(0, 11)}} />}
                 </Box>
                 {activeData.message}
                 <InteractiveUserName userName={activeData.userName} uid={activeData.uid} />

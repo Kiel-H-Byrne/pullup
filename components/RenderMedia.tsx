@@ -1,7 +1,7 @@
 import { AspectRatio, Image } from "@chakra-ui/react";
 import { PullUp } from "../types";
 
-export const RenderMedia = ({ media, options }: { media: PullUp['media'], options: { title: string, autoplay: boolean } }) => {
+export const RenderMedia = ({ media, options }: { media: PullUp['media'], options: { title: string, autoplay?: boolean } }) => {
   if (media) {
     switch (media.type) {
       case "video":
