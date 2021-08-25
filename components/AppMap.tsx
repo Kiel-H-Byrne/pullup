@@ -8,7 +8,6 @@ import MyInfoWindow from "./InfoWindow";
 import { GEOCENTER, MAP_STYLES } from "../util/constants";
 import { AspectRatio, Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Image, useDisclosure } from "@chakra-ui/react";
 import { GLocation, PullUp } from "../types";
-import cloudinary from "cloudinary-core";
 import useSWR from "swr";
 import fetcher from "../util/fetch";
 import { InteractiveUserName } from "./InteractiveUserName";

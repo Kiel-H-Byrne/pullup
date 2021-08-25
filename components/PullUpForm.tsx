@@ -7,7 +7,6 @@ import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Button,
 import { signin, useSession } from "next-auth/client";
 import VideoRecorder from 'react-video-recorder'
 import { useState } from "react";
-// import { UploadApiResponse } from "@cloudinary/base";
 
 interface Props {
   onClose: () => void;
