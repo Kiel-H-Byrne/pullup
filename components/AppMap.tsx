@@ -11,7 +11,6 @@ import { GLocation, PullUp } from "../types";
 import { AdvancedVideo } from "@cloudinary/react";
 import useSWR from "swr";
 import fetcher from "../util/fetch";
-import { getTruncated } from "../util/helpers";
 const LIBRARIES: Libraries = ["places", "visualization", "geometry", "localContext"];
 
 const clusterStyles = [
@@ -58,7 +57,6 @@ const clusterStyles = [
 ];
 
 const defaultProps = {
-
   center: GEOCENTER,
   zoom: 5, //vs 11
   options: {
@@ -114,9 +112,9 @@ const AppMap = memo(({
   const { data, error } = useSWR(uri, fetcher);
   const pullups: PullUp[] = !error && data?.pullups;
   const onClick = (e: any) => {
-console.log(e.markerClusterer.markers)
-//if gridsize is certain size; need to render an enumerated solution in infowindow 
-// (tab through cards of pins that sit on top of each other)
+    console.log(e.markerClusterer.markers)
+    //if gridsize is certain size; need to render an enumerated solution in infowindow 
+    // (tab through cards of pins that sit on top of each other)
   }
   return (
     // Important! Always set the container height explicitly via mapContainerClassName

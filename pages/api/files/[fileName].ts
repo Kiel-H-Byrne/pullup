@@ -48,33 +48,6 @@ export default async function fileHandler(req: NextApiRequest, res: NextApiRespo
         res.send(error)
       }
       break
-    // case "PUT":
-      // cloudinary.v2.config({
-      //   cloud_name: process.env.CLOUDINARY_NAME,
-      //   api_key: process.env.CLOUDINARY_KEY,
-      //   api_secret: process.env.CLOUDINARY_SECRET,
-      // });
-      // try {
-      //   const file = req.body.data;
-      //   console.log("----------------file----------------------")
-      //   const file_uri = await cloudinary.v2.uploader.upload_large(file,
-      //     {
-      //       resource_type: 'auto',
-      //     },
-      //     function onEnd(error, result) {
-      //       if (error) {
-      //         console.log(error)
-      //         return error
-      //       }
-      //       console.log(result.secure_url)
-      //       return result.secure_url
-      //     }
-      //   )
-
-      // } catch (error) {
-      //   console.warn(error.code)
-      //   // res.send(error)
-      // }
     default:
       res.setHeader("Allow", ["GET", "POST", "PUT"]);
       res.status(405).end(`Method ${method} Not Allowed`);
