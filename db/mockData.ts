@@ -6,9 +6,15 @@ export const mockShouts: PullUp[] = [{
   uid: "ugibberish001",
   userName: "roMancerRocker",
   message: "Love it here!",
-  location: {lat: 0, lng: 0},
-  timestamp: new Date,
+  location: { lat: 0, lng: 0 },
+  timestamp: new Date().toString(),
   media: {
-    url: ""
+    uri: "",
+    fileName: "sample-vid",
+    height: 480,
+    width: 640,
+    duration: 0,
+    bytes: 0,
+    type: "video",
   },
 }]

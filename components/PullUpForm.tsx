@@ -1,14 +1,13 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useFormik } from "formik";
-import useSWR, { mutate } from "swr";
+import { mutate } from "swr";
 import axios from "axios";
 import { GLocation, PullUp } from "../types";
 import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Button, Center, CircularProgress, Flex, Text, Textarea } from "@chakra-ui/react";
 import { signin, useSession } from "next-auth/client";
-import { getTruncated } from "../util/helpers";
 import VideoRecorder from 'react-video-recorder'
 import { useState } from "react";
-import fetcher from "../util/fetch";
+// import { UploadApiResponse } from "@cloudinary/base";
 
 interface Props {
   onClose: () => void;
@@ -21,10 +20,11 @@ interface Props {
 export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
   const [session, loading] = useSession();
   const [allowRecord, setAllowRecord] = useState(false)
-  const [blob, setBlob] = useState(null as Blob)
-  const onRecFinish = (videoBlob: Blob) => {
+  const [videoBlob, setVideoBlob] = useState(null as Blob)
+  const formRef = useRef(null)
+  const onRecFinish = (blob: Blob) => {
     // console.log('videoBlob', videoBlob)
-    setBlob(videoBlob)
+    setVideoBlob(blob)
   }
   const formik = useFormik({
     initialValues: {
@@ -45,14 +45,29 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
       //show x or check, if wrong, get accurate point. if right, show modal
       //load modal w/ form
       //on form submit, place pin on map, pan to new pin, wait, pan back to user's location
+      //upload and get URL for video blob
+      //set url to form values and submit
 
-      const apiUri = `api/pullups?lat=${getTruncated(
-        locationData.lat
-      )}&lng=${getTruncated(locationData.lng)}`;
-
-      const FILE_NAME = `${session.id}_${new Date().getTime()}_${locationData.lng.toString().slice(7)}${locationData.lat.toString().slice(7)}`
-      const fileUri = `/api/files/${FILE_NAME}`
       helpers.setSubmitting(true);
+      const apiUri = `api/pullups?lat=${locationData.lat}&lng=${locationData.lng}`;
+      // const FILE_NAME = `${session.id}_${new Date().getTime()}_${locationData.lng.toString().slice(7)}${locationData.lat.toString().slice(7)}`
+      /** get FileURI fxn */
+      const submitUri = `https://api.cloudinary.com/v1_1/pulupklowd/upload`
+      const fd = new FormData();
+      fd.append('file', videoBlob);
+      fd.append('upload_preset', 'fkc3ua7z')
+      let res = await fetch(
+        submitUri,
+        {
+          method: "post",
+          mode: "cors",
+          body: fd
+        }
+      )
+      let json = await res.json();
+      console.log(json)
+      const { secure_url, public_id, original_filename, duration, bytes, height, width, resource_type, format } = json;
+
       const submit_data = {
         ...values,
         userName,
@@ -61,18 +76,15 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
           lng: locationData.lng,
           lat: locationData.lat,
         },
-        fileName: FILE_NAME,
-        // media: blob && await blob.arrayBuffer(),
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
+        media: {
+          uri: secure_url,
+          fileName: public_id,
+          type: resource_type,
+          height, width, duration, bytes, format
+        }
       };
-      mutate(apiUri, submit_data, false); //should i put mutate here or after the post with no options.
-      // console.log(blob)
-      mutate(
-        apiUri,
-        await axios.put(fileUri, blob, {
-          // headers: { "content-type": blob.type }
-          headers: { 'Content-Type': `multipart/form-data; boundary=${blob._boundary}` }
-        }));
+      mutate(apiUri, submit_data, false);
       mutate(
         apiUri,
         await axios.post(apiUri, {
@@ -89,7 +101,7 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
   return (
     <Box marginInline="3">
       {!formik.isSubmitting ? (
-        <form onSubmit={formik.handleSubmit} encType="multipart/form-data">
+        <form onSubmit={formik.handleSubmit} encType="multipart/form-data" ref={formRef}>
           <Accordion defaultIndex={[0]} allowMultiple>
             <AccordionItem>
               <AccordionButton textAlign="center">

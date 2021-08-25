@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-import { Marker } from "@react-google-maps/api";
+import { Marker, MarkerProps } from "@react-google-maps/api";
 
 interface IMyMarker {
   data: any;

@@ -2,8 +2,10 @@ import { GridFSBucket, ObjectId } from "mongodb";
 import { cachedBucket, connectToDatabase } from "../../../db";
 import { uploadFile } from "../../../db/files";
 import fs from 'fs';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { rejects } from 'node:assert';
 
-export default async function fileHandler(req: any, res: any) {
+export default async function fileHandler(req: NextApiRequest, res: NextApiResponse) {
   const db = await connectToDatabase();
   const bucket = cachedBucket || new GridFSBucket(db);
   const {
@@ -31,7 +33,7 @@ export default async function fileHandler(req: any, res: any) {
       const blob = req.body as Blob
       try {
         if (!blob) throw Error('no object')
-        bucket.openUploadStream(fileName, {
+        bucket.openUploadStream(fileName as string, {
           chunkSizeBytes: blob.size,
           metadata: { type: blob.type }
         }).
