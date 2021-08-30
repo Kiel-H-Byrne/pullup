@@ -16,5 +16,6 @@ export interface PullUp {
     duration: number,
     bytes: number,
     type: string,
+    thumbnailUri: string,
   };
 }

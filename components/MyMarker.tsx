@@ -15,7 +15,6 @@ interface IMyMarker {
 const MyMarker = ({
   data,
   clusterer,
-  activeData,
   setActiveData,
   setWindowClose,
   toggleWindow,
@@ -30,7 +29,7 @@ const MyMarker = ({
   };
 
   const handleMouseOverMarker = () => {
-    setActiveData(data);
+    setActiveData([data]);
     toggleWindow();
   };
   const handleMouseOut = () => {
@@ -48,6 +47,8 @@ const MyMarker = ({
         onMouseOver={handleMouseOverMarker}
         onMouseOut={handleMouseOut}
         onClick={handleClickMarker}
+        //@ts-ignore
+        // __data={data}
         // visible={categories.some((el) => selectedCategories.has(el))} //check for if category matches selected categories
       />
     </div>

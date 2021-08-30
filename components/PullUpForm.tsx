@@ -51,7 +51,10 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
       const apiUri = `api/pullups?lat=${locationData.lat}&lng=${locationData.lng}`;
       // const FILE_NAME = `${session.id}_${new Date().getTime()}_${locationData.lng.toString().slice(7)}${locationData.lat.toString().slice(7)}`
       /** get FileURI fxn */
-      const submitUri = `https://api.cloudinary.com/v1_1/pulupklowd/upload`
+      const submitUri = `https://api.cloudinary.com/v1_1/pulupklowd/upload`;
+      const thumbnailBaseUri = `https://res.cloudinary.com/pulupklowd/video/upload`;
+      const thumbnailOptions = `/e_vectorize:colors:33:detail:0.33`
+      // e_cartoonify
       const fd = new FormData();
       fd.append('file', videoBlob);
       fd.append('upload_preset', 'fkc3ua7z')
@@ -64,7 +67,6 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
         }
       )
       let json = await res.json();
-      console.log(json)
       const { secure_url, public_id, original_filename, duration, bytes, height, width, resource_type, format } = json;
 
       const submit_data = {
@@ -79,6 +81,7 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
         media: {
           uri: secure_url,
           fileName: public_id,
+          thumbnailUri: `${thumbnailBaseUri}${thumbnailOptions}/${public_id}.svg`,
           type: resource_type,
           height, width, duration, bytes, format
         }

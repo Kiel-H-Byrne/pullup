@@ -1,35 +1,81 @@
 import React from "react";
 import { InfoWindow } from "@react-google-maps/api";
-import { PullUp } from "../types";
-import { Box, Flex, Progress, Text } from "@chakra-ui/react";
-import { useSession } from "next-auth/client";
+import { GLocation, PullUp } from "../types";
+import { Box, Flex, Progress, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react";
+// import { useSession } from "next-auth/client";
 import { RenderMedia } from "./RenderMedia";
 
-const MyInfoWindow = ({ activeData }: { activeData: PullUp }) => {
-  const { location, uid, userName } = activeData;
-  const [session, loading] = useSession()
-  // let loc = location.split(",");
-  // let locObj = { lat: parseFloat(loc[0]), lng: parseFloat(loc[1]) };
+const MyInfoWindow = ({ activeData }: { activeData: PullUp[] }) => {
+  const options = {
+    pixelOffset: { height: -40, width: 0, equals: undefined },
+    disableAutoPan: true,
+  }
+  // const hasNoData = !activeData || activeData.length == 0
+  const hasOneItem = activeData.length && activeData.length == 1
+  console.log("infowindow fired")
+  console.log(activeData, hasOneItem)
+  // const [session, loading] = useSession()
+  return (
 
+    hasOneItem ? <SingleInfoContent data={activeData} options={options} /> : <MultipleInfoContent data={activeData} options={options} /> 
+  )
+}
+
+
+export default React.memo(MyInfoWindow);
+
+const SingleInfoContent = ({ data, options }: { data: PullUp[], options: any }) => {
+  const { location, userName, media, message } = data[0];
   return (
     <InfoWindow
       position={location}
-      options={{
-        pixelOffset: { height: -40, width: 0, equals: void (0) },
-        disableAutoPan: true,
-      }}
+      options={options}
     >
-      {activeData ? (
-        <Flex width="xs" direction="column">
-          {activeData.media && <RenderMedia media={activeData.media} options={{ title: activeData.message.substr(0, 11), autoplay: true, }} />}
-          <Text as="h2">{activeData.message}</Text>
-          <Text fontWeight="light" fontSize=".7rem" color="gray.300">{userName} </Text>
-        </Flex>
-      ) : (
-        <Progress />
-      )}
-    </InfoWindow>
-  );
-};
+      <Flex width="xs" direction="column">
+        {media && <RenderMedia media={media} options={{
+          title: message.substr(0, 11),
+          thumbOnly: true
+        }} />}
+        <Text as="h2">{message}</Text>
+        <Text fontWeight="light" fontSize=".7rem" color="gray.300">{userName} </Text>
+      </Flex>
+    </InfoWindow>);
+}
 
-export default React.memo(MyInfoWindow);
+const MultipleInfoContent = ({ data, options }: { data: PullUp[], options: any }) => {
+  const { location } = data[0];
+  console.log(data[0])
+  return (
+    <InfoWindow
+      position={location}
+      options={options}
+    >
+      <Box>
+        <Tabs>
+          <TabList>
+            {data.map(el => {
+              <Tab key={el.timestamp}>{el.userName} - {el.timestamp} </Tab>
+            })}
+          </TabList>
+          <TabPanels>
+            {data.map(el => {
+              const { media, message, userName } = el;
+              return (
+                <TabPanel key={el.timestamp}>
+                  <Flex width="xs" direction="column">
+                    {media && <RenderMedia media={media} options={{
+                      title: message.substr(0, 11),
+                      thumbOnly: true
+                    }} />}
+                    <Text as="h2">{message}</Text>
+                    <Text fontWeight="light" fontSize=".7rem" color="gray.300">{userName} </Text>
+                  </Flex>
+                </TabPanel>)
+
+            })}
+          </TabPanels>
+        </Tabs>
+      </Box>
+    </InfoWindow>
+  )
+}

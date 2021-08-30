@@ -1,12 +1,12 @@
 import React, { useState, memo } from "react";
 
-import { GoogleMap, LoadScript, MarkerClusterer } from "@react-google-maps/api";
+import { GoogleMap, GoogleMapProps, LoadScript, MarkerClusterer } from "@react-google-maps/api";
 import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
 
 import MyMarker from "./MyMarker";
 import MyInfoWindow from "./InfoWindow";
 import { GEOCENTER, MAP_STYLES } from "../util/constants";
-import { AspectRatio, Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Image, useDisclosure } from "@chakra-ui/react";
+import { AspectRatio, Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Image, useDisclosure, useToast } from "@chakra-ui/react";
 import { GLocation, PullUp } from "../types";
 import useSWR from "swr";
 import fetcher from "../util/fetch";
@@ -95,27 +95,49 @@ const defaultProps = {
 interface IAppMap {
   clientLocation: GLocation;
   setMapInstance: any;
-  mapInstance: any;
+  mapInstance: GoogleMapProps & any;
 }
 
 const AppMap = memo(({
   clientLocation,
   setMapInstance,
+  mapInstance,
 }: IAppMap) => {
   const { isOpen: isDrawerOpen, onOpen: setDrawerOpen, onClose: setDrawerClose } = useDisclosure()
   const { isOpen: isWindowOpen, onToggle: toggleWindow, onClose: setWindowClose } = useDisclosure()
-  const [activeData, setActiveData] = useState(null as PullUp);
+  const toast = useToast();
+  const [activeData, setActiveData] = useState(null as PullUp[]);
 
   let { center, zoom, options } = defaultProps;
   const uri = clientLocation ? `api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}` : null;
   // const uri = clientLocation ? `api/pullups?lat=${getTruncated(clientLocation.lat)}&lng=${getTruncated(clientLocation.lng)}` : null;
-
-  const { data, error } = useSWR(uri, fetcher);
-  const pullups: PullUp[] = !error && data?.pullups;
+  const { data: fetchData, error } = useSWR(uri, fetcher, {loadingTimeout: 1000,errorRetryCount: 3 });
+  const pullups: PullUp[] = !error && fetchData?.pullups;
+  const checkForOverlaps = (data: PullUp[]) => {
+      return data.reduce((acc, el) => {
+        const found = acc.find(a => {
+          console.log(a)
+          console.log(el.location.lng.toString().slice(0,-3))
+          return a.location.lng.toString().slice(0,-3) == el.location.lng.toString().slice(0,-3)})
+        // console.log(found)
+        if (found) (acc.push(el))
+        
+        return acc;
+      }, [] as PullUp[])
+  }
   const onClick = (e: any) => {
-    console.log(e.markerClusterer.markers)
-    //if gridsize is certain size; need to render an enumerated solution in infowindow 
+    //if map zoom is max, and still have cluster, make infowindow with multiple listings...
     // (tab through cards of pins that sit on top of each other)
+    if (mapInstance.zoom == mapInstance.maxZoom ) {
+      console.log(checkForOverlaps(pullups))
+      console.log(e.markerClusterer) //markers position and xref with pullups data?
+      // e.markerclusterer.markers.length //length should equal pullups length with close centers (within 5 sig dig)
+      
+      const clusterCenter = e.markerClusterer.clusters[0].center;
+
+      // setActiveData(e.markerClusterer.markers)
+      // toggleWindow()
+    }
   }
   return (
     // Important! Always set the container height explicitly via mapContainerClassName
@@ -146,7 +168,9 @@ const AppMap = memo(({
             setSelectedCategories={setSelectedCategories}
           />
         )} */}
-        {pullups && (
+        {clientLocation && !pullups && toast({title: "Searching...", status: "info"})}
+        {clientLocation && pullups && pullups.length == 0 && toast({title: "No Results", status: "info"})}
+        {clientLocation && pullups && pullups.length !== 0 && (
           <MarkerClusterer
             styles={clusterStyles}
             averageCenter
@@ -154,10 +178,10 @@ const AppMap = memo(({
             onClick={onClick}
             // onClick={(event) =>{console.log(event.getMarkers())}}
             gridSize={2}
-            minimumClusterSize={3}
+            minimumClusterSize={2}
           >
             {(clusterer) =>
-              Object.values(pullups).map((data) => {
+              Object.values(pullups).map((markerData) => {
                 //return marker if element categories array includes value from selected_categories\\
 
                 // if ( //if closeby
@@ -183,10 +207,9 @@ const AppMap = memo(({
                   // ) ? (
 
                   <MyMarker
-                    key={`marker-${data._id}`}
+                    key={`marker-${markerData._id}`}
                     //what data can i set on marker?
-                    //@ts-ignore
-                    data={data}
+                    data={markerData}
                     // label={}
                     // title={}
                     clusterer={clusterer}
