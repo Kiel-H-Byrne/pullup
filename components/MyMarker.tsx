@@ -9,7 +9,7 @@ interface IMyMarker {
   setActiveData: any;
   setWindowClose: any;
   toggleWindow: any;
-  setDrawerOpen: any;
+  toggleDrawer: any;
 }
 
 const MyMarker = ({
@@ -18,7 +18,7 @@ const MyMarker = ({
   setActiveData,
   setWindowClose,
   toggleWindow,
-  setDrawerOpen,
+  toggleDrawer,
 }: IMyMarker) => {
   let loc;
   const { location, _id } = data;
@@ -36,7 +36,7 @@ const MyMarker = ({
     toggleWindow();
   };
   const handleClickMarker = () => {
-    setDrawerOpen();
+    toggleDrawer();
   };
   return (
     <div className="App-marker" key={_id}>

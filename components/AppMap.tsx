@@ -12,6 +12,7 @@ import useSWR from "swr";
 import fetcher from "../util/fetch";
 import { InteractiveUserName } from "./InteractiveUserName";
 import { RenderMedia } from "./RenderMedia";
+import cluster from "cluster";
 const LIBRARIES: Libraries = ["places", "visualization", "geometry", "localContext"];
 
 const clusterStyles = [
@@ -103,41 +104,57 @@ const AppMap = memo(({
   setMapInstance,
   mapInstance,
 }: IAppMap) => {
-  const { isOpen: isDrawerOpen, onOpen: setDrawerOpen, onClose: setDrawerClose } = useDisclosure()
+  const { isOpen: isDrawerOpen, onOpen: toggleDrawer, onClose: setDrawerClose } = useDisclosure()
   const { isOpen: isWindowOpen, onToggle: toggleWindow, onClose: setWindowClose } = useDisclosure()
-  const toast = useToast();
+  const [windowPosition, setWindowPosition] = useState(null as GLocation);
   const [activeData, setActiveData] = useState(null as PullUp[]);
+  const toast = useToast();
 
   let { center, zoom, options } = defaultProps;
   const uri = clientLocation ? `api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}` : null;
   // const uri = clientLocation ? `api/pullups?lat=${getTruncated(clientLocation.lat)}&lng=${getTruncated(clientLocation.lng)}` : null;
-  const { data: fetchData, error } = useSWR(uri, fetcher, {loadingTimeout: 1000,errorRetryCount: 3 });
+  const { data: fetchData, error } = useSWR(uri, fetcher, { loadingTimeout: 1000, errorRetryCount: 3 });
   const pullups: PullUp[] = !error && fetchData?.pullups;
+
   const checkForOverlaps = (data: PullUp[]) => {
-      return data.reduce((acc, el) => {
-        const found = acc.find(a => {
-          console.log(a)
-          console.log(el.location.lng.toString().slice(0,-3))
-          return a.location.lng.toString().slice(0,-3) == el.location.lng.toString().slice(0,-3)})
-        // console.log(found)
-        if (found) (acc.push(el))
-        
-        return acc;
-      }, [] as PullUp[])
+    const result: { [key: string]: PullUp[] } = data.reduce(function (r, a) {
+      //           console.log(el.location.lng.toString().slice(0,-3))
+      // const locStringTrunc = `{lng: ${a.location.lng.toString().slice(0,-3)}, lat: ${a.location.lat.toString().slice(0,-3)}}`
+      const locString = JSON.stringify(a.location);
+      // console.log(locStringTrunc)
+      r[locString] = r[locString] || [];
+      r[locString].push(a);
+      return r;
+    }, Object.create(null) as { [key: string]: PullUp[] });
+    const dupes = Object.values(result).find(el => el.length > 1);
+    return dupes;
   }
   const onClick = (e: any) => {
     //if map zoom is max, and still have cluster, make infowindow with multiple listings...
     // (tab through cards of pins that sit on top of each other)
-    if (mapInstance.zoom == mapInstance.maxZoom ) {
-      console.log(checkForOverlaps(pullups))
-      console.log(e.markerClusterer) //markers position and xref with pullups data?
-      // e.markerclusterer.markers.length //length should equal pullups length with close centers (within 5 sig dig)
-      
-      const clusterCenter = e.markerClusterer.clusters[0].center;
+    toggleDrawer()
 
-      // setActiveData(e.markerClusterer.markers)
-      // toggleWindow()
+  }
+
+  const handleMouseOver = (e: any) => {
+    if (mapInstance.zoom == mapInstance.maxZoom) {
+      //there may be potential for this to not work as expected if multiple groups of markers closeby instead of one?
+      const dupes = checkForOverlaps(pullups)
+      // e.markerclusterer.markers.length //length should equal pullups length with close centers (within 5 sig dig)
+      const clusterCenter = e.markerClusterer.clusters[0].center;
+      setWindowPosition(clusterCenter)
+      // console.log(JSON.stringify(clusterCenter))
+      // console.log(JSON.stringify(dupes[0].location))
+      setActiveData(dupes)
+      toggleWindow()
     }
+  }
+  const handleMouseOut = () => {
+    if (windowPosition) {
+      // setWindowPosition(null)
+      toggleWindow()
+    }
+
   }
   return (
     // Important! Always set the container height explicitly via mapContainerClassName
@@ -168,20 +185,22 @@ const AppMap = memo(({
             setSelectedCategories={setSelectedCategories}
           />
         )} */}
-        {clientLocation && !pullups && toast({title: "Searching...", status: "info"})}
-        {clientLocation && pullups && pullups.length == 0 && toast({title: "No Results", status: "info"})}
+        {clientLocation && !pullups && toast({ title: "Searching...", status: "info" })}
+        {clientLocation && pullups && pullups.length == 0 && toast({ title: "No Results", status: "info" })}
         {clientLocation && pullups && pullups.length !== 0 && (
           <MarkerClusterer
             styles={clusterStyles}
             averageCenter
             enableRetinaIcons
             onClick={onClick}
+            onMouseOver={handleMouseOver}
+            onMouseOut={handleMouseOut}
             // onClick={(event) =>{console.log(event.getMarkers())}}
             gridSize={2}
             minimumClusterSize={2}
           >
             {(clusterer) =>
-              Object.values(pullups).map((markerData) => {
+              pullups.map((markerData) => {
                 //return marker if element categories array includes value from selected_categories\\
 
                 // if ( //if closeby
@@ -217,7 +236,7 @@ const AppMap = memo(({
                     setActiveData={setActiveData}
                     setWindowClose={setWindowClose}
                     toggleWindow={toggleWindow}
-                    setDrawerOpen={setDrawerOpen}
+                    toggleDrawer={toggleDrawer}
                   />
                 );
                 // }
@@ -225,7 +244,7 @@ const AppMap = memo(({
             }
           </MarkerClusterer>
         )}
-        {activeData && isWindowOpen && <MyInfoWindow activeData={activeData} />}
+        {activeData && isWindowOpen && <MyInfoWindow activeData={activeData} clusterCenter={windowPosition} />}
 
         {activeData && isDrawerOpen && (
           <Drawer
@@ -240,11 +259,18 @@ const AppMap = memo(({
               <DrawerCloseButton />
               <DrawerHeader>Info</DrawerHeader>
               <DrawerBody>
-                <Box>
-                  {activeData.media && <RenderMedia media={activeData.media} options={{title: activeData.message.substr(0, 11)}} />}
-                </Box>
-                {activeData.message}
-                <InteractiveUserName userName={activeData.userName} uid={activeData.uid} />
+                {activeData.length > 1
+                  ?
+                  activeData.map(el => (<div>
+                    some tab situation
+                  </div>))
+                  :
+                  (<> <Box>
+                    {activeData[0].media && <RenderMedia media={activeData[0].media} options={{ title: activeData[0].message.substr(0, 11) }} />}
+                  </Box>
+                    {activeData[0].message}
+                    <InteractiveUserName userName={activeData[0].userName} uid={activeData[0].uid} /></>)
+                }
               </DrawerBody>
             </DrawerContent>
           </Drawer>

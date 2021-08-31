@@ -5,10 +5,11 @@ import { Box, Flex, Progress, Tab, TabList, TabPanel, TabPanels, Tabs, Text } fr
 // import { useSession } from "next-auth/client";
 import { RenderMedia } from "./RenderMedia";
 
-const MyInfoWindow = ({ activeData }: { activeData: PullUp[] }) => {
+const MyInfoWindow = ({ activeData, clusterCenter }: { activeData: PullUp[], clusterCenter: GLocation }) => {
   const options = {
     pixelOffset: { height: -40, width: 0, equals: undefined },
     disableAutoPan: true,
+    position: clusterCenter
   }
   // const hasNoData = !activeData || activeData.length == 0
   const hasOneItem = activeData.length && activeData.length == 1
@@ -43,11 +44,10 @@ const SingleInfoContent = ({ data, options }: { data: PullUp[], options: any }) 
 }
 
 const MultipleInfoContent = ({ data, options }: { data: PullUp[], options: any }) => {
-  const { location } = data[0];
-  console.log(data[0])
+  const { position }: {position: GLocation} = options;
   return (
     <InfoWindow
-      position={location}
+      position={position}
       options={options}
     >
       <Box>
