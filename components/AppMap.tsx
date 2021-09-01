@@ -6,13 +6,13 @@ import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-ur
 import MyMarker from "./MyMarker";
 import MyInfoWindow from "./InfoWindow";
 import { GEOCENTER, MAP_STYLES } from "../util/constants";
-import { AspectRatio, Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Image, useDisclosure, useToast } from "@chakra-ui/react";
+import { AspectRatio, Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Flex, Image, Tab, TabList, TabPanel, TabPanels, Tabs, Text, useDisclosure, useToast } from "@chakra-ui/react";
 import { GLocation, PullUp } from "../types";
 import useSWR from "swr";
 import fetcher from "../util/fetch";
 import { InteractiveUserName } from "./InteractiveUserName";
 import { RenderMedia } from "./RenderMedia";
-import cluster from "cluster";
+import { useCallback } from "react";
 const LIBRARIES: Libraries = ["places", "visualization", "geometry", "localContext"];
 
 const clusterStyles = [
@@ -106,10 +106,11 @@ const AppMap = memo(({
 }: IAppMap) => {
   const { isOpen: isDrawerOpen, onOpen: toggleDrawer, onClose: setDrawerClose } = useDisclosure()
   const { isOpen: isWindowOpen, onToggle: toggleWindow, onClose: setWindowClose } = useDisclosure()
-  const [windowPosition, setWindowPosition] = useState(null as GLocation);
+  const [infoWindowPosition, setInfoWindowPosition] = useState(null as GLocation);
   const [activeData, setActiveData] = useState(null as PullUp[]);
+  // console.log(activeData)
   const toast = useToast();
-
+  activeData && toast.closeAll()
   let { center, zoom, options } = defaultProps;
   const uri = clientLocation ? `api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}` : null;
   // const uri = clientLocation ? `api/pullups?lat=${getTruncated(clientLocation.lat)}&lng=${getTruncated(clientLocation.lng)}` : null;
@@ -118,14 +119,12 @@ const AppMap = memo(({
 
   const checkForOverlaps = (data: PullUp[]) => {
     const result: { [key: string]: PullUp[] } = data.reduce(function (r, a) {
-      //           console.log(el.location.lng.toString().slice(0,-3))
-      // const locStringTrunc = `{lng: ${a.location.lng.toString().slice(0,-3)}, lat: ${a.location.lat.toString().slice(0,-3)}}`
-      const locString = JSON.stringify(a.location);
-      // console.log(locStringTrunc)
+      const locString = `{lng: ${a.location.lng.toString().slice(0, -3)}, lat: ${a.location.lat.toString().slice(0, -3)}}`
       r[locString] = r[locString] || [];
       r[locString].push(a);
       return r;
     }, Object.create(null) as { [key: string]: PullUp[] });
+    // console.log(result)
     const dupes = Object.values(result).find(el => el.length > 1);
     return dupes;
   }
@@ -142,19 +141,18 @@ const AppMap = memo(({
       const dupes = checkForOverlaps(pullups)
       // e.markerclusterer.markers.length //length should equal pullups length with close centers (within 5 sig dig)
       const clusterCenter = e.markerClusterer.clusters[0].center;
-      setWindowPosition(clusterCenter)
-      // console.log(JSON.stringify(clusterCenter))
+      // const clusterCenter = JSON.parse(JSON.stringify(e.markerClusterer.clusters[0].center));
+      setInfoWindowPosition(clusterCenter)
       // console.log(JSON.stringify(dupes[0].location))
-      setActiveData(dupes)
-      toggleWindow()
+      dupes && setActiveData(dupes)
+      dupes && toggleWindow()
     }
   }
   const handleMouseOut = () => {
-    if (windowPosition) {
+    if (infoWindowPosition) {
       // setWindowPosition(null)
       toggleWindow()
     }
-
   }
   return (
     // Important! Always set the container height explicitly via mapContainerClassName
@@ -244,7 +242,7 @@ const AppMap = memo(({
             }
           </MarkerClusterer>
         )}
-        {activeData && isWindowOpen && <MyInfoWindow activeData={activeData} clusterCenter={windowPosition} />}
+        {activeData && isWindowOpen && <MyInfoWindow activeData={activeData} clusterCenter={infoWindowPosition} />}
 
         {activeData && isDrawerOpen && (
           <Drawer
@@ -258,12 +256,35 @@ const AppMap = memo(({
             <DrawerContent>
               <DrawerCloseButton />
               <DrawerHeader>Info</DrawerHeader>
-              <DrawerBody>
+              <DrawerBody p={0}>
                 {activeData.length > 1
                   ?
-                  activeData.map(el => (<div>
-                    some tab situation
-                  </div>))
+                  <Tabs isFitted variant="enclosed">
+                    <TabList>
+                      {activeData.map((el, i) =>
+                        <Tab key={i} >
+                          <Text fontSize="sm" fontWeight="semibold" > @{el.userName} - {new Date(el.timestamp).toLocaleDateString()} </Text>
+                        </Tab>
+                      )}
+                    </TabList>
+                    <TabPanels>
+                      {activeData.map((el, i) => {
+                        const { media, message, userName } = el;
+                        return (
+                          <TabPanel key={i} p={0} bgColor="goldenrod" boxShadow="xl">
+                            <Flex direction="column">
+                              {media && <Box paddingBlock={1}><RenderMedia media={media} options={{
+                                title: message.substr(0, 11),
+                              }} /></Box>}
+                              <Box p={1}><Text as="h2">{message}</Text>
+                                {/* <InteractiveUserName userName={userName} uid={uid} /> */}
+                                <Text fontWeight="semibold" fontSize=".7rem" color="gray.400">@{userName} </Text>
+                              </Box></Flex>
+                          </TabPanel>)
+
+                      })}
+                    </TabPanels>
+                  </Tabs>
                   :
                   (<> <Box>
                     {activeData[0].media && <RenderMedia media={activeData[0].media} options={{ title: activeData[0].message.substr(0, 11) }} />}

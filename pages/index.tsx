@@ -7,7 +7,6 @@ import AppMap from "../components/AppMap";
 const mapCenter = { lat: -34.397, lng: 150.644 };
 
 const IndexPage = () => {
-  const googlemap = useRef(null);
   const [clientLocation, setClientLocation] = useState(null);
   const [mapInstance, setMapInstance] = useState(null);
 

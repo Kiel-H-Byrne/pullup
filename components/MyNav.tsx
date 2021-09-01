@@ -28,7 +28,7 @@ export const MyNav = (props: Props) => {
   const { isOpen, onToggle, onClose } = useDisclosure();
 
   return (
-    <Flex as="header" position="absolute" top={0} left={0} zIndex={1}>
+    <Flex as="header" position="absolute" top={0} left={0} zIndex={1} width="100%" p={1}>
       <Box display={{ base: "block", md: "none" }} onClick={onToggle}>
         <Button>{isOpen ? <CloseIcon /> : <HamburgerIcon />}</Button>
       </Box>

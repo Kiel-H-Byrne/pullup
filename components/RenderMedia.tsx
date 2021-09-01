@@ -24,7 +24,7 @@ export const RenderMedia = ({ media, options }: { media: PullUp['media'], option
         break;
 
       default:
-        console.log(media.type)
+        console.log(media)
         return <div>Unrecognized Media</div>
         break;
     }
