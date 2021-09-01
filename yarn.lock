@@ -681,33 +681,6 @@
   dependencies:
     "@chakra-ui/utils" "1.8.2"
 
-"@cloudinary/base@^1.0.0-beta.4":
-  version "1.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@cloudinary/base/-/base-1.0.0-beta.4.tgz#3747ed7f12b400a5afaee8d4839bd5562e619e5a"
-  integrity sha512-ese1CUGo/mko+FVM08rE7jytHimYhhcaMUT4FqERM+Ems24tBU9beypZ2olp2G5T/rUp+A2zutEDK+IxD8ADBg==
-  dependencies:
-    "@types/lodash.clonedeep" "^4.5.6"
-    lodash.clonedeep "^4.5.0"
-
-"@cloudinary/html@1.0.0-beta.2":
-  version "1.0.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@cloudinary/html/-/html-1.0.0-beta.2.tgz#3523aca7aa263cbc1f6459918c062d34a9700bd0"
-  integrity sha512-Leie6RQmiwC/Krz80p1eLfOv16BhtICSi1MFbMIC0JjigM0bQr8ZwxDEx1E7KIqedcC6+gTd1P6n+rlFxy1fWg==
-  dependencies:
-    "@types/lodash.clonedeep" "^4.5.6"
-    "@types/lodash.debounce" "^4.0.6"
-    "@types/node" "^14.14.10"
-    lodash.clonedeep "^4.5.0"
-    lodash.debounce "^4.0.8"
-    typescript "^4.1.2"
-
-"@cloudinary/react@^1.0.0-beta.8":
-  version "1.0.0-beta.8"
-  resolved "https://registry.yarnpkg.com/@cloudinary/react/-/react-1.0.0-beta.8.tgz#a136a39ac4389c44f78c9393653b037d8bc7bd3e"
-  integrity sha512-zxK8J6fOijKvb0UzGp7k6/9+Y1WBw4xrARoVgMEwUnk6kDgCTFxbJWiMg6a6/pwfYn/Ma6hc2XVq/tOZtuAi2g==
-  dependencies:
-    "@cloudinary/html" "1.0.0-beta.2"
-
 "@emotion/babel-plugin@^11.3.0":
   version "11.3.0"
   resolved "https://registry.yarnpkg.com/@emotion/babel-plugin/-/babel-plugin-11.3.0.tgz#3a16850ba04d8d9651f07f3fb674b3436a4fb9d7"
@@ -1006,20 +979,6 @@
   resolved "https://registry.yarnpkg.com/@types/google.maps/-/google.maps-3.45.6.tgz#441a7bc76424243b307596fc8d282a435a979ebd"
   integrity sha512-BzGzxs8UXFxeP8uN/0nRgGbsbpYQxSCKsv/7S8OitU7wwhfFcqQSm5aAcL1nbwueMiJ/VVmIZKPq69s0kX5W+Q==
 
-"@types/lodash.clonedeep@^4.5.6":
-  version "4.5.6"
-  resolved "https://registry.yarnpkg.com/@types/lodash.clonedeep/-/lodash.clonedeep-4.5.6.tgz#3b6c40a0affe0799a2ce823b440a6cf33571d32b"
-  integrity sha512-cE1jYr2dEg1wBImvXlNtp0xDoS79rfEdGozQVgliDZj1uERH4k+rmEMTudP9b4VQ8O6nRb5gPqft0QzEQGMQgA==
-  dependencies:
-    "@types/lodash" "*"
-
-"@types/lodash.debounce@^4.0.6":
-  version "4.0.6"
-  resolved "https://registry.yarnpkg.com/@types/lodash.debounce/-/lodash.debounce-4.0.6.tgz#c5a2326cd3efc46566c47e4c0aa248dc0ee57d60"
-  integrity sha512-4WTmnnhCfDvvuLMaF3KV4Qfki93KebocUF45msxhYyjMttZDQYzHkO639ohhk8+oco2cluAFL3t5+Jn4mleylQ==
-  dependencies:
-    "@types/lodash" "*"
-
 "@types/lodash.mergewith@4.6.6":
   version "4.6.6"
   resolved "https://registry.yarnpkg.com/@types/lodash.mergewith/-/lodash.mergewith-4.6.6.tgz#c4698f5b214a433ff35cb2c75ee6ec7f99d79f10"
@@ -1049,11 +1008,6 @@
   version "16.7.1"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-16.7.1.tgz#c6b9198178da504dfca1fd0be9b2e1002f1586f0"
   integrity sha512-ncRdc45SoYJ2H4eWU9ReDfp3vtFqDYhjOsKlFFUDEn8V1Bgr2RjYal8YT5byfadWIRluhPFU6JiDOl0H6Sl87A==
-
-"@types/node@^14.14.10":
-  version "14.17.11"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.11.tgz#82d266d657aec5ff01ca59f2ffaff1bb43f7bf0f"
-  integrity sha512-n2OQ+0Bz6WEsUjrvcHD1xZ8K+Kgo4cn9/w94s1bJS690QMUWfJPW/m7CCb7gPkA1fcYwL2UpjXP/rq/Eo41m6w==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -2996,16 +2950,6 @@ lodash-es@^4.17.15, lodash-es@^4.17.21:
   resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
   integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
 
-lodash.clonedeep@^4.5.0:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/lodash.clonedeep/-/lodash.clonedeep-4.5.0.tgz#e23f3f9c4f8fbdde872529c1071857a086e5ccef"
-  integrity sha1-4j8/nE+Pvd6HJSnBBxhXoIblzO8=
-
-lodash.debounce@^4.0.8:
-  version "4.0.8"
-  resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
-  integrity sha1-gteb/zCmfEAF/9XiUVMArZyk168=
-
 lodash.includes@^4.3.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/lodash.includes/-/lodash.includes-4.3.0.tgz#60bb98a87cb923c68ca1e51325483314849f553f"
@@ -4635,7 +4579,7 @@ typescript@4.3.4:
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.3.4.tgz#3f85b986945bcf31071decdd96cf8bfa65f9dcbc"
   integrity sha512-uauPG7XZn9F/mo+7MrsRjyvbxFpzemRjKEZXS4AK83oP2KKOJPvb+9cO/gmnv8arWZvhnjVOXz7B49m1l0e9Ew==
 
-typescript@^4.1.2, typescript@^4.3.5:
+typescript@^4.3.5:
   version "4.3.5"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.3.5.tgz#4d1c37cc16e893973c45a06886b7113234f119f4"
   integrity sha512-DqQgihaQ9cUrskJo9kIyW/+g0Vxsk8cDtZ52a3NGh0YNTfpUSArXSohyUGnvbPazEPLu398C0UxmKSOrPumUzA==

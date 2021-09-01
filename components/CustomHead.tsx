@@ -5,8 +5,8 @@ interface Props {
   title: string
 }
 
-export const CustomHead = ({title}: Props) => {
-  
+export const CustomHead = ({ title }: Props) => {
+
   return (
     <Head>
       <title>{title}</title>
@@ -14,7 +14,8 @@ export const CustomHead = ({title}: Props) => {
 
       <meta
         name="viewport"
-        content="width=device-width, initial-scale=0.86, maximum-scale=5.0, minimum-scale=0.86"
+        // content="width=device-width, initial-scale=0.86, maximum-scale=1, minimum-scale=0.86"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"
       />
       <meta name="format-detection" content="telephone=no" />
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
@@ -88,6 +89,9 @@ export const CustomHead = ({title}: Props) => {
         href="/img/icons/safari-pinned-tab.svg"
         color="#9BA17B"
       />
+<link href="https://unpkg.com/video.js/dist/video-js.min.css" rel="stylesheet" />
+<script src="https://unpkg.com/video.js/dist/video.min.js" />
+
     </Head>
   );
 };

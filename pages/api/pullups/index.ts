@@ -15,35 +15,32 @@ const pullupHandler = async (req: any, res: any) => {
   switch (method) {
     case "GET":
       console.log("getting pullups near:")
-      console.log( lat, lng)
+      console.log(lat, lng)
       const pullups =
         lat && lng
           ? await getPullupsNearBy(
-              db,
-              lat && lng
-                ? { lat: Number(lat), lng: Number(lng) }
-                : { lat: 0, lng: 0 },
-              by,
-              limit ? parseInt(limit, 10) : 100
-            )
+            db,
+            { lat: Number(lat), lng: Number(lng) },
+            by,
+            limit ? parseInt(limit, 10) : 100
+          )
           : await getPullUps(db);
-      if (lat && lng && pullups.length > 0) {
-        // This is safe to cache because from defines
-        //  a concrete range of pullups
-        res.setHeader("cache-control", `public, max-age=${maxAge}`);
-      }
+      // if (lat && lng && pullups.length > 0) {
+      //   // This is only safe to cache when a timeframe is defined
+      //   res.setHeader("cache-control", `public, max-age=${maxAge}`);
+      // }
       res.send({ pullups });
       break;
     case "POST":
       // if (!req.user) {
-        //   return res.status(401).send('unauthenticated');
-        // }
+      //   return res.status(401).send('unauthenticated');
+      // }
 
-        if (!req.body)
-          return res.status(400).send("You must write something");
-        
-        const pullup = await insertPullUp(db, req.body.data);
-        return res.json({ pullup });
+      if (!req.body)
+        return res.status(400).send("You must write something");
+
+      const pullup = await insertPullUp(db, req.body.data);
+      return res.json({ pullup });
       break;
     default:
       res.setHeader("Allow", ["GET", "POST"]);

@@ -1,16 +1,18 @@
 import React, { useState, memo } from "react";
 
-import { GoogleMap, LoadScript, MarkerClusterer } from "@react-google-maps/api";
+import { GoogleMap, GoogleMapProps, LoadScript, MarkerClusterer } from "@react-google-maps/api";
 import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
 
 import MyMarker from "./MyMarker";
 import MyInfoWindow from "./InfoWindow";
 import { GEOCENTER, MAP_STYLES } from "../util/constants";
-import { AspectRatio, Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Image, useDisclosure } from "@chakra-ui/react";
+import { AspectRatio, Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Flex, Image, Tab, TabList, TabPanel, TabPanels, Tabs, Text, useDisclosure, useToast } from "@chakra-ui/react";
 import { GLocation, PullUp } from "../types";
-import { AdvancedVideo } from "@cloudinary/react";
 import useSWR from "swr";
 import fetcher from "../util/fetch";
+import { InteractiveUserName } from "./InteractiveUserName";
+import { RenderMedia } from "./RenderMedia";
+import { useCallback } from "react";
 const LIBRARIES: Libraries = ["places", "visualization", "geometry", "localContext"];
 
 const clusterStyles = [
@@ -94,27 +96,63 @@ const defaultProps = {
 interface IAppMap {
   clientLocation: GLocation;
   setMapInstance: any;
-  mapInstance: any;
+  mapInstance: GoogleMapProps & any;
 }
 
 const AppMap = memo(({
   clientLocation,
   setMapInstance,
+  mapInstance,
 }: IAppMap) => {
-  const { isOpen: isDrawerOpen, onOpen: setDrawerOpen, onClose: setDrawerClose } = useDisclosure()
+  const { isOpen: isDrawerOpen, onOpen: toggleDrawer, onClose: setDrawerClose } = useDisclosure()
   const { isOpen: isWindowOpen, onToggle: toggleWindow, onClose: setWindowClose } = useDisclosure()
-  const [activeData, setActiveData] = useState(null as PullUp);
-
+  const [infoWindowPosition, setInfoWindowPosition] = useState(null as GLocation);
+  const [activeData, setActiveData] = useState(null as PullUp[]);
+  // console.log(activeData)
+  const toast = useToast();
+  activeData && toast.closeAll()
   let { center, zoom, options } = defaultProps;
   const uri = clientLocation ? `api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}` : null;
   // const uri = clientLocation ? `api/pullups?lat=${getTruncated(clientLocation.lat)}&lng=${getTruncated(clientLocation.lng)}` : null;
+  const { data: fetchData, error } = useSWR(uri, fetcher, { loadingTimeout: 1000, errorRetryCount: 3 });
+  const pullups: PullUp[] = !error && fetchData?.pullups;
 
-  const { data, error } = useSWR(uri, fetcher);
-  const pullups: PullUp[] = !error && data?.pullups;
+  const checkForOverlaps = (data: PullUp[]) => {
+    const result: { [key: string]: PullUp[] } = data.reduce(function (r, a) {
+      const locString = `{lng: ${a.location.lng.toString().slice(0, -3)}, lat: ${a.location.lat.toString().slice(0, -3)}}`
+      r[locString] = r[locString] || [];
+      r[locString].push(a);
+      return r;
+    }, Object.create(null) as { [key: string]: PullUp[] });
+    // console.log(result)
+    const dupes = Object.values(result).find(el => el.length > 1);
+    return dupes;
+  }
   const onClick = (e: any) => {
-    console.log(e.markerClusterer.markers)
-    //if gridsize is certain size; need to render an enumerated solution in infowindow 
+    //if map zoom is max, and still have cluster, make infowindow with multiple listings...
     // (tab through cards of pins that sit on top of each other)
+    toggleDrawer()
+
+  }
+
+  const handleMouseOver = (e: any) => {
+    if (mapInstance.zoom == mapInstance.maxZoom) {
+      //there may be potential for this to not work as expected if multiple groups of markers closeby instead of one?
+      const dupes = checkForOverlaps(pullups)
+      // e.markerclusterer.markers.length //length should equal pullups length with close centers (within 5 sig dig)
+      const clusterCenter = e.markerClusterer.clusters[0].center;
+      // const clusterCenter = JSON.parse(JSON.stringify(e.markerClusterer.clusters[0].center));
+      setInfoWindowPosition(clusterCenter)
+      // console.log(JSON.stringify(dupes[0].location))
+      dupes && setActiveData(dupes)
+      dupes && toggleWindow()
+    }
+  }
+  const handleMouseOut = () => {
+    if (infoWindowPosition) {
+      // setWindowPosition(null)
+      toggleWindow()
+    }
   }
   return (
     // Important! Always set the container height explicitly via mapContainerClassName
@@ -145,18 +183,22 @@ const AppMap = memo(({
             setSelectedCategories={setSelectedCategories}
           />
         )} */}
-        {pullups && (
+        {clientLocation && !pullups && toast({ title: "Searching...", status: "info" })}
+        {clientLocation && pullups && pullups.length == 0 && toast({ title: "No Results", status: "info" })}
+        {clientLocation && pullups && pullups.length !== 0 && (
           <MarkerClusterer
             styles={clusterStyles}
             averageCenter
             enableRetinaIcons
             onClick={onClick}
+            onMouseOver={handleMouseOver}
+            onMouseOut={handleMouseOut}
             // onClick={(event) =>{console.log(event.getMarkers())}}
             gridSize={2}
-          minimumClusterSize={1}
+            minimumClusterSize={2}
           >
             {(clusterer) =>
-              Object.values(pullups).map((data) => {
+              pullups.map((markerData) => {
                 //return marker if element categories array includes value from selected_categories\\
 
                 // if ( //if closeby
@@ -182,10 +224,9 @@ const AppMap = memo(({
                   // ) ? (
 
                   <MyMarker
-                    key={`marker-${data._id}`}
+                    key={`marker-${markerData._id}`}
                     //what data can i set on marker?
-                    //@ts-ignore
-                    data={data}
+                    data={markerData}
                     // label={}
                     // title={}
                     clusterer={clusterer}
@@ -193,7 +234,7 @@ const AppMap = memo(({
                     setActiveData={setActiveData}
                     setWindowClose={setWindowClose}
                     toggleWindow={toggleWindow}
-                    setDrawerOpen={setDrawerOpen}
+                    toggleDrawer={toggleDrawer}
                   />
                 );
                 // }
@@ -201,7 +242,7 @@ const AppMap = memo(({
             }
           </MarkerClusterer>
         )}
-        {activeData && isWindowOpen && <MyInfoWindow activeData={activeData} />}
+        {activeData && isWindowOpen && <MyInfoWindow activeData={activeData} clusterCenter={infoWindowPosition} />}
 
         {activeData && isDrawerOpen && (
           <Drawer
@@ -215,11 +256,42 @@ const AppMap = memo(({
             <DrawerContent>
               <DrawerCloseButton />
               <DrawerHeader>Info</DrawerHeader>
-              <DrawerBody>
-                <Box>
-                  {activeData.media && <RenderMedia media={activeData.media} caption={activeData.message.substr(0,11)}/>}
-                </Box>
-                {activeData.message}
+              <DrawerBody p={0}>
+                {activeData.length > 1
+                  ?
+                  <Tabs isFitted variant="enclosed">
+                    <TabList>
+                      {activeData.map((el, i) =>
+                        <Tab key={i} >
+                          <Text fontSize="sm" fontWeight="semibold" > @{el.userName} - {new Date(el.timestamp).toLocaleDateString()} </Text>
+                        </Tab>
+                      )}
+                    </TabList>
+                    <TabPanels>
+                      {activeData.map((el, i) => {
+                        const { media, message, userName } = el;
+                        return (
+                          <TabPanel key={i} p={0} bgColor="goldenrod" boxShadow="xl">
+                            <Flex direction="column">
+                              {media && <Box paddingBlock={1}><RenderMedia media={media} options={{
+                                title: message.substr(0, 11),
+                              }} /></Box>}
+                              <Box p={1}><Text as="h2">{message}</Text>
+                                {/* <InteractiveUserName userName={userName} uid={uid} /> */}
+                                <Text fontWeight="semibold" fontSize=".7rem" color="gray.400">@{userName} </Text>
+                              </Box></Flex>
+                          </TabPanel>)
+
+                      })}
+                    </TabPanels>
+                  </Tabs>
+                  :
+                  (<> <Box>
+                    {activeData[0].media && <RenderMedia media={activeData[0].media} options={{ title: activeData[0].message.substr(0, 11) }} />}
+                  </Box>
+                    {activeData[0].message}
+                    <InteractiveUserName userName={activeData[0].userName} uid={activeData[0].uid} /></>)
+                }
               </DrawerBody>
             </DrawerContent>
           </Drawer>
@@ -232,25 +304,3 @@ const AppMap = memo(({
 });
 
 export default AppMap;
-
-const RenderMedia = ({ media, caption }: { media: PullUp['media'], caption: string }) => {
-  console.log(media)
-  if (media) {
-    switch (media.type) {
-      case "video":
-        return (<AspectRatio> <video controls><source src={media.uri} />Your browser does not support the video tag.</video></AspectRatio>);
-        break;
-      case "image":
-        return <Image src={media.uri} />;
-        break;
-      case "audio":
-        return <audio src={media.uri} />;
-        break;
-
-      default:
-        console.log(media.type)
-        return <div>Unrecognized Media</div>
-        break;
-    }
-  }
-};

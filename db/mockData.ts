@@ -11,6 +11,7 @@ export const mockShouts: PullUp[] = [{
   media: {
     uri: "",
     fileName: "sample-vid",
+    thumbnailUri: "",
     height: 480,
     width: 640,
     duration: 0,

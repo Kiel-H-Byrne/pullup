@@ -9,17 +9,16 @@ interface IMyMarker {
   setActiveData: any;
   setWindowClose: any;
   toggleWindow: any;
-  setDrawerOpen: any;
+  toggleDrawer: any;
 }
 
 const MyMarker = ({
   data,
   clusterer,
-  activeData,
   setActiveData,
   setWindowClose,
   toggleWindow,
-  setDrawerOpen,
+  toggleDrawer,
 }: IMyMarker) => {
   let loc;
   const { location, _id } = data;
@@ -30,14 +29,14 @@ const MyMarker = ({
   };
 
   const handleMouseOverMarker = () => {
-    setActiveData(data);
+    setActiveData([data]);
     toggleWindow();
   };
   const handleMouseOut = () => {
     toggleWindow();
   };
   const handleClickMarker = () => {
-    setDrawerOpen();
+    toggleDrawer();
   };
   return (
     <div className="App-marker" key={_id}>
@@ -48,6 +47,8 @@ const MyMarker = ({
         onMouseOver={handleMouseOverMarker}
         onMouseOut={handleMouseOut}
         onClick={handleClickMarker}
+        //@ts-ignore
+        // __data={data}
         // visible={categories.some((el) => selectedCategories.has(el))} //check for if category matches selected categories
       />
     </div>

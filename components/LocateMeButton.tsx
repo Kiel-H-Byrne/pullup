@@ -38,7 +38,7 @@ export const LocateMeButton = (props: Props) => {
     //calculate closest listing(s)
     //when user clicks again, turn tracking off.
     let oldMarker: google.maps.Marker;
-    if (!geoWatchId) {
+    if (!geoWatchId && !clientLocation) {
       const location = window.navigator && window.navigator.geolocation;
       if (location) {
         const watchId = location.watchPosition(
