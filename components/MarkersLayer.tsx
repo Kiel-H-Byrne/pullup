@@ -43,7 +43,7 @@ export const MarkersLayer = (props: Props) => {
     return null;
   } else {
     //make api call using user's location
-    const uri = `api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}`;
+    const uri = `/api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}`;
 
     const { data, error } = useSWR(uri, fetcher);
     data &&

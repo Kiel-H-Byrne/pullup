@@ -1,6 +1,6 @@
 import { Button, Center, Icon, IconButton, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Text, useDisclosure } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { GLocation } from '../types';
+import { GLocation, PullUp } from '../types';
 import { findClosestMarker, targetClient } from '../util/helpers';
 import { MdMyLocation } from 'react-icons/md'
 import { BiMapPin, BiMessageAltAdd } from 'react-icons/bi';
@@ -8,6 +8,7 @@ import { signIn, useSession } from 'next-auth/client';
 import { PullUpForm } from './PullUpForm';
 
 interface Props {
+  pullups: PullUp[];
   mapInstance: google.maps.Map | google.maps.StreetViewPanorama;
   setClientLocation: any //a usestate fxn returning {latlng};
   clientLocation: GLocation
@@ -21,7 +22,7 @@ export const LocateMeButton = (props: Props) => {
   const [clientMarker, setClientMarker] = useState(null);
   const [toggleDisplay, setToggleDisplay] = useState(false);
   const [session, loading] = useSession();
-  const { mapInstance, setClientLocation, clientLocation } = props;
+  const { pullups, mapInstance, setClientLocation, clientLocation } = props;
   useEffect(() => {
     //pan map to new center every new lat/long
     //do nothing, then cleanup
@@ -56,6 +57,7 @@ export const LocateMeButton = (props: Props) => {
                 title: "My Location",
                 // animation: googleWindow.maps.Animation.BOUNCE,
               });
+              marker.setZIndex(-1)
               const clientRadius = new googleWindow.maps.Circle({
                 map: mapInstance as google.maps.Map,
                 center: new googleWindow.maps.LatLng(positionObject),
@@ -75,21 +77,22 @@ export const LocateMeButton = (props: Props) => {
             setClientLocation(positionObject);
             targetClient(mapInstance, positionObject);
 
-            if (!closestListing) {
-              setClosestListing(findClosestMarker([], positionObject));
-            } else {
-              // IN order to change the marker background i need the marker. in the old app an array of markers were stored in redux state
-              if (oldMarker !== closestListing) {
-                // set old marker icon
-                //   url: "img/map/orange_marker_sm.png",
-                // console.log("change color of marker")
-                console.log("changing markers..." + closestListing);
-              } else {
-                // set closest marker icon
-                //   url: "img/map/red_marker_sm.png",
-                oldMarker = closestListing;
-              }
-            }
+            // if (!closestListing) {
+            //   console.log("setting closest marker")
+            //   pullups && setClosestListing(findClosestMarker(pullups, positionObject));
+            // } else {
+            //   // IN order to change the marker background i need the marker. in the old app an array of markers were stored in redux state
+            //   if (oldMarker !== closestListing) {
+            //     // set old marker icon
+            //       // url: "img/map/orange_marker_sm.png",
+            //     // console.log("change color of marker")
+            //     console.log("changing markers..." + closestListing);
+            //   } else {
+            //     // set closest marker icon
+            //       // url: "img/map/red_marker_sm.png",
+            //     oldMarker = closestListing;
+            //   }
+            // }
           },
           (error) => {
             console.warn(error);
@@ -101,7 +104,7 @@ export const LocateMeButton = (props: Props) => {
           {
             enableHighAccuracy: true,
             // timeout: 5000,
-            maximumAge: 0,
+            maximumAge: 60,
           }
         );
         setGeoWatchId(watchId);

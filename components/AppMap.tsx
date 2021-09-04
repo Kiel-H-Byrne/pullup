@@ -13,6 +13,7 @@ import fetcher from "../util/fetch";
 import { InteractiveUserName } from "./InteractiveUserName";
 import { RenderMedia } from "./RenderMedia";
 import { useCallback } from "react";
+import { LocateMeButton } from "./LocateMeButton";
 const LIBRARIES: Libraries = ["places", "visualization", "geometry", "localContext"];
 
 const clusterStyles = [
@@ -94,30 +95,33 @@ const defaultProps = {
 };
 
 interface IAppMap {
+  setClientLocation: any;
   clientLocation: GLocation;
   setMapInstance: any;
   mapInstance: GoogleMapProps & any;
 }
 
 const AppMap = memo(({
+  setClientLocation,
   clientLocation,
   setMapInstance,
   mapInstance,
 }: IAppMap) => {
-  const { isOpen: isDrawerOpen, onOpen: toggleDrawer, onClose: setDrawerClose } = useDisclosure()
-  const { isOpen: isWindowOpen, onToggle: toggleWindow, onClose: setWindowClose } = useDisclosure()
+  const { isOpen: isDrawerOpen, onOpen: toggleDrawer, onClose: setDrawerClose } = useDisclosure();
+  const { isOpen: isWindowOpen, onToggle: toggleWindow, onClose: setWindowClose } = useDisclosure();
   const [infoWindowPosition, setInfoWindowPosition] = useState(null as GLocation);
-  const [activeData, setActiveData] = useState(null as PullUp[]);
-  // console.log(activeData)
-  const toast = useToast();
-  activeData && toast.closeAll()
+  const [iwData, setIwData] = useState(null as PullUp[]);
   let { center, zoom, options } = defaultProps;
-  const uri = clientLocation ? `api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}` : null;
-  // const uri = clientLocation ? `api/pullups?lat=${getTruncated(clientLocation.lat)}&lng=${getTruncated(clientLocation.lng)}` : null;
+  const uri = clientLocation ? `/api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}` : null;
+  // const uri = clientLocation ? `/api/pullups?lat=${getTruncated(clientLocation.lat)}&lng=${getTruncated(clientLocation.lng)}` : null;
   const { data: fetchData, error } = useSWR(uri, fetcher, { loadingTimeout: 1000, errorRetryCount: 3 });
+  if (error) {
+    console.warn(error)
+  }
   const pullups: PullUp[] = !error && fetchData?.pullups;
+  const toast = useToast();
 
-  const checkForOverlaps = (data: PullUp[]) => {
+  const checkForOverlaps = useCallback((data: PullUp[]) => {
     const result: { [key: string]: PullUp[] } = data.reduce(function (r, a) {
       const locString = `{lng: ${a.location.lng.toString().slice(0, -3)}, lat: ${a.location.lat.toString().slice(0, -3)}}`
       r[locString] = r[locString] || [];
@@ -127,24 +131,33 @@ const AppMap = memo(({
     // console.log(result)
     const dupes = Object.values(result).find(el => el.length > 1);
     return dupes;
-  }
-  const onClick = (e: any) => {
-    //if map zoom is max, and still have cluster, make infowindow with multiple listings...
-    // (tab through cards of pins that sit on top of each other)
-    toggleDrawer()
+  }, [pullups])
+  if (pullups) { toast.closeAll(); }
 
+
+  const dupes = pullups && checkForOverlaps(pullups)
+
+  const onClick = (e: any) => {
+    if (mapInstance.zoom == mapInstance.maxZoom) {
+      //if map zoom is max, and still have cluster, make infowindow with multiple listings...
+      // (tab through cards of pins that sit on top of each other)
+      console.log("i've clicked..open the drawer", iwData)
+      if (iwData)
+        toggleDrawer()
+    } else {
+      console.log("no data")
+    }
   }
 
   const handleMouseOver = (e: any) => {
     if (mapInstance.zoom == mapInstance.maxZoom) {
       //there may be potential for this to not work as expected if multiple groups of markers closeby instead of one?
-      const dupes = checkForOverlaps(pullups)
       // e.markerclusterer.markers.length //length should equal pullups length with close centers (within 5 sig dig)
       const clusterCenter = e.markerClusterer.clusters[0].center;
       // const clusterCenter = JSON.parse(JSON.stringify(e.markerClusterer.clusters[0].center));
       setInfoWindowPosition(clusterCenter)
       // console.log(JSON.stringify(dupes[0].location))
-      dupes && setActiveData(dupes)
+      dupes && setIwData(dupes)
       dupes && toggleWindow()
     }
   }
@@ -194,8 +207,8 @@ const AppMap = memo(({
             onMouseOver={handleMouseOver}
             onMouseOut={handleMouseOut}
             // onClick={(event) =>{console.log(event.getMarkers())}}
-            gridSize={2}
-            minimumClusterSize={2}
+            gridSize={30} //how big the square of a cluster is in pixels //60
+          // minimumClusterSize={2} //how many need to be in before it makes a cluster //2
           >
             {(clusterer) =>
               pullups.map((markerData) => {
@@ -230,8 +243,8 @@ const AppMap = memo(({
                     // label={}
                     // title={}
                     clusterer={clusterer}
-                    activeData={activeData}
-                    setActiveData={setActiveData}
+                    activeData={iwData}
+                    setActiveData={setIwData}
                     setWindowClose={setWindowClose}
                     toggleWindow={toggleWindow}
                     toggleDrawer={toggleDrawer}
@@ -242,9 +255,9 @@ const AppMap = memo(({
             }
           </MarkerClusterer>
         )}
-        {activeData && isWindowOpen && <MyInfoWindow activeData={activeData} clusterCenter={infoWindowPosition} />}
+        {iwData && isWindowOpen && <MyInfoWindow activeData={iwData} clusterCenter={infoWindowPosition} />}
 
-        {activeData && isDrawerOpen && (
+        {iwData && isDrawerOpen && (
           <Drawer
             // activeData={activeData}
             isOpen={isDrawerOpen}
@@ -257,18 +270,18 @@ const AppMap = memo(({
               <DrawerCloseButton />
               <DrawerHeader>Info</DrawerHeader>
               <DrawerBody p={0}>
-                {activeData.length > 1
+                {iwData.length > 1
                   ?
                   <Tabs isFitted variant="enclosed">
                     <TabList>
-                      {activeData.map((el, i) =>
+                      {iwData.map((el, i) =>
                         <Tab key={i} >
                           <Text fontSize="sm" fontWeight="semibold" > @{el.userName} - {new Date(el.timestamp).toLocaleDateString()} </Text>
                         </Tab>
                       )}
                     </TabList>
                     <TabPanels>
-                      {activeData.map((el, i) => {
+                      {iwData.map((el, i) => {
                         const { media, message, userName } = el;
                         return (
                           <TabPanel key={i} p={0} bgColor="goldenrod" boxShadow="xl">
@@ -287,10 +300,10 @@ const AppMap = memo(({
                   </Tabs>
                   :
                   (<> <Box>
-                    {activeData[0].media && <RenderMedia media={activeData[0].media} options={{ title: activeData[0].message.substr(0, 11) }} />}
+                    {iwData[0].media && <RenderMedia media={iwData[0].media} options={{ title: iwData[0].message.substr(0, 11) }} />}
                   </Box>
-                    {activeData[0].message}
-                    <InteractiveUserName userName={activeData[0].userName} uid={activeData[0].uid} /></>)
+                    {iwData[0].message}
+                    <InteractiveUserName userName={iwData[0].userName} uid={iwData[0].uid} /></>)
                 }
               </DrawerBody>
             </DrawerContent>
@@ -299,6 +312,12 @@ const AppMap = memo(({
 
         {/* <HeatmapLayer map={this.state.map && this.state.map} data={data.map(x => {x.location})} /> */}
       </GoogleMap>
+      <LocateMeButton
+          pullups={pullups}
+          mapInstance={mapInstance}
+          clientLocation={clientLocation}
+          setClientLocation={setClientLocation}
+        />
     </LoadScript>
   );
 });

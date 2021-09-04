@@ -48,7 +48,7 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
       //set url to form values and submit
 
       helpers.setSubmitting(true);
-      const apiUri = `api/pullups?lat=${locationData.lat}&lng=${locationData.lng}`;
+      const apiUri = `/api/pullups?lat=${locationData.lat}&lng=${locationData.lng}`;
       let mediaInfo;
       if (videoBlob) {
         // const FILE_NAME = `${session.id}_${new Date().getTime()}_${locationData.lng.toString().slice(7)}${locationData.lat.toString().slice(7)}`
@@ -131,7 +131,9 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
               <AccordionPanel>
 
                 {allowRecord && <VideoRecorder
-                  onRecordingComplete={onRecFinish} isOnInitially countdownTime={0}
+                  onRecordingComplete={onRecFinish} isOnInitially countdownTime={0} 
+                  renderDisconnectedView={() => <></>}
+                  renderLoadingView={() => <></>}
                 />}
               </AccordionPanel>
             </AccordionItem>
