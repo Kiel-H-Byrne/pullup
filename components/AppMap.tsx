@@ -203,11 +203,11 @@ const AppMap = memo(({
             styles={clusterStyles}
             averageCenter
             enableRetinaIcons
-            onClick={onClick}
-            onMouseOver={handleMouseOver}
-            onMouseOut={handleMouseOut}
-            // onClick={(event) =>{console.log(event.getMarkers())}}
             gridSize={30} //how big the square of a cluster is in pixels //60
+            onClick={onClick}
+            // onMouseOver={handleMouseOver}
+            // onMouseOut={handleMouseOut}
+            // onClick={(event) =>{console.log(event.getMarkers())}}
           // minimumClusterSize={2} //how many need to be in before it makes a cluster //2
           >
             {(clusterer) =>
