@@ -104,7 +104,7 @@ export const LocateMeButton = (props: Props) => {
           {
             enableHighAccuracy: true,
             // timeout: 5000,
-            maximumAge: 60,
+            maximumAge: 3000,
           }
         );
         setGeoWatchId(watchId);

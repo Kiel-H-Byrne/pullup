@@ -132,8 +132,8 @@ export const PullUpForm = ({ onClose, locationData, uid, userName }: Props) => {
 
                 {allowRecord && <VideoRecorder
                   onRecordingComplete={onRecFinish} isOnInitially countdownTime={0} 
-                  renderDisconnectedView={() => <></>}
-                  renderLoadingView={() => <></>}
+                  // renderDisconnectedView={() => <></>}
+                  // renderLoadingView={() => <></>}
                 />}
               </AccordionPanel>
             </AccordionItem>
