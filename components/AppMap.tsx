@@ -149,24 +149,24 @@ const AppMap = memo(({
     }
   }
 
-  const handleMouseOver = (e: any) => {
-    if (mapInstance.zoom == mapInstance.maxZoom) {
-      //there may be potential for this to not work as expected if multiple groups of markers closeby instead of one?
-      // e.markerclusterer.markers.length //length should equal pullups length with close centers (within 5 sig dig)
-      const clusterCenter = e.markerClusterer.clusters[0].center;
-      // const clusterCenter = JSON.parse(JSON.stringify(e.markerClusterer.clusters[0].center));
-      setInfoWindowPosition(clusterCenter)
-      // console.log(JSON.stringify(dupes[0].location))
-      dupes && setIwData(dupes)
-      dupes && toggleWindow()
-    }
-  }
-  const handleMouseOut = () => {
-    if (infoWindowPosition) {
-      // setWindowPosition(null)
-      toggleWindow()
-    }
-  }
+  // const handleMouseOver = (e: any) => {
+  //   if (mapInstance.zoom == mapInstance.maxZoom) {
+  //     //there may be potential for this to not work as expected if multiple groups of markers closeby instead of one?
+  //     // e.markerclusterer.markers.length //length should equal pullups length with close centers (within 5 sig dig)
+  //     const clusterCenter = e.markerClusterer.clusters[0].center;
+  //     // const clusterCenter = JSON.parse(JSON.stringify(e.markerClusterer.clusters[0].center));
+  //     setInfoWindowPosition(clusterCenter)
+  //     // console.log(JSON.stringify(dupes[0].location))
+  //     dupes && setIwData(dupes)
+  //     dupes && toggleWindow()
+  //   }
+  // }
+  // const handleMouseOut = () => {
+  //   if (infoWindowPosition) {
+  //     // setWindowPosition(null)
+  //     toggleWindow()
+  //   }
+  // }
   return (
     // Important! Always set the container height explicitly via mapContainerClassName
     <LoadScript
