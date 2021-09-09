@@ -2,7 +2,19 @@ import { AspectRatio, Image } from "@chakra-ui/react";
 import { PullUp } from "../types";
 
 export const RenderMedia = ({ media, options }: { media: PullUp['media'], options: { title: string, thumbOnly?: boolean } }) => {
+
+const handleMouseOver = (e) => {
+  e.target.play();
+  e.target.controls = true
+}
+
+const handleMouseOut = (e) => {
+  e.target.pause();
+  e.target.controls = false
+}
+
   if (media) {
+
     if (options.thumbOnly) {
       return <Image src={media.thumbnailUri} />;
     }
@@ -12,7 +24,8 @@ export const RenderMedia = ({ media, options }: { media: PullUp['media'], option
         //4:3 ==1.333
         return (
           <AspectRatio ratio={1.333} >
-            <video controls controlsList="nofullscreen nodownload" preload="metadata" playsInline {...options}><source src={media.uri} />Your browser does not support the video tag.</video>
+            <video loop controlsList="nofullscreen nodownload" preload="metadata" playsInline {...options} onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>
+              <source src={media.uri} />Your browser does not support the video tag.</video>
           </AspectRatio>
         );
         break;

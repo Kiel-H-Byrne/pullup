@@ -2,7 +2,6 @@ export interface GLocation { lat: number, lng: number }
 
 export interface PullUp {
   _id: any;
-  pid: string;
   uid: string;
   userName: string;
   message: string;
@@ -16,6 +15,7 @@ export interface PullUp {
     duration: number,
     bytes: number,
     type: string,
-    thumbnailUri: string,
+    thumbnailUri?: string,
+    format: string,
   };
 }

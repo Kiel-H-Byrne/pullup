@@ -14,6 +14,8 @@ import { InteractiveUserName } from "./InteractiveUserName";
 import { RenderMedia } from "./RenderMedia";
 import { useCallback } from "react";
 import { LocateMeButton } from "./LocateMeButton";
+import { MdPersonPinCircle } from "react-icons/md";
+import { useEffect } from "react";
 const LIBRARIES: Libraries = ["places", "visualization", "geometry", "localContext"];
 
 const clusterStyles = [
@@ -121,31 +123,36 @@ const AppMap = memo(({
   const pullups: PullUp[] = !error && fetchData?.pullups;
   const toast = useToast();
 
+  const toThreePlaces = (num: number) => num.toString().match(/^-?\d+(?:\.\d{0,3})?/)[0]
+
+  useEffect(() => {
+    const dupes = pullups && checkForOverlaps(pullups)
+    setIwData(dupes)
+  }, [pullups])
+
+
   const checkForOverlaps = useCallback((data: PullUp[]) => {
     const result: { [key: string]: PullUp[] } = data.reduce(function (r, a) {
-      const locString = `{lng: ${a.location.lng.toString().slice(0, -3)}, lat: ${a.location.lat.toString().slice(0, -3)}}`
+      const locString = `{lng: ${toThreePlaces(a.location.lng)}, lat: ${toThreePlaces(a.location.lat)}}`
       r[locString] = r[locString] || [];
       r[locString].push(a);
       return r;
     }, Object.create(null) as { [key: string]: PullUp[] });
-    // console.log(result)
-    const dupes = Object.values(result).find(el => el.length > 1);
-    return dupes;
+    const iwData = Object.values(result).find(el => el.length > 1);
+    return iwData;
   }, [pullups])
   if (pullups) { toast.closeAll(); }
-
-
-  const dupes = pullups && checkForOverlaps(pullups)
 
   const onClick = (e: any) => {
     if (mapInstance.zoom == mapInstance.maxZoom) {
       //if map zoom is max, and still have cluster, make infowindow with multiple listings...
       // (tab through cards of pins that sit on top of each other)
-      console.log("i've clicked..open the drawer", iwData)
-      if (iwData)
+      // console.log("i've clicked..open the drawer", iwData)
+      if (iwData) {
         toggleDrawer()
-    } else {
-      console.log("no data")
+      } else {
+        console.log("no data")
+      }
     }
   }
 
@@ -156,9 +163,9 @@ const AppMap = memo(({
   //     const clusterCenter = e.markerClusterer.clusters[0].center;
   //     // const clusterCenter = JSON.parse(JSON.stringify(e.markerClusterer.clusters[0].center));
   //     setInfoWindowPosition(clusterCenter)
-  //     // console.log(JSON.stringify(dupes[0].location))
-  //     dupes && setIwData(dupes)
-  //     dupes && toggleWindow()
+  //     // console.log(JSON.stringify(iwData[0].location))
+  //     iwData && setIwData(iwData)
+  //     iwData && toggleWindow()
   //   }
   // }
   // const handleMouseOut = () => {
@@ -205,9 +212,9 @@ const AppMap = memo(({
             enableRetinaIcons
             gridSize={30} //how big the square of a cluster is in pixels //60
             onClick={onClick}
-            // onMouseOver={handleMouseOver}
-            // onMouseOut={handleMouseOut}
-            // onClick={(event) =>{console.log(event.getMarkers())}}
+          // onMouseOver={handleMouseOver}
+          // onMouseOut={handleMouseOut}
+          // onClick={(event) =>{console.log(event.getMarkers())}}
           // minimumClusterSize={2} //how many need to be in before it makes a cluster //2
           >
             {(clusterer) =>
@@ -268,36 +275,27 @@ const AppMap = memo(({
             <DrawerOverlay />
             <DrawerContent>
               <DrawerCloseButton />
-              <DrawerHeader>Info</DrawerHeader>
+              <DrawerHeader>
+                <Flex dir="row"><MdPersonPinCircle /> Info</Flex>
+              </DrawerHeader>
               <DrawerBody p={0}>
                 {iwData.length > 1
                   ?
-                  <Tabs isFitted variant="enclosed">
-                    <TabList>
-                      {iwData.map((el, i) =>
-                        <Tab key={i} >
-                          <Text fontSize="sm" fontWeight="semibold" > @{el.userName} - {new Date(el.timestamp).toLocaleDateString()} </Text>
-                        </Tab>
-                      )}
-                    </TabList>
-                    <TabPanels>
-                      {iwData.map((el, i) => {
-                        const { media, message, userName } = el;
-                        return (
-                          <TabPanel key={i} p={0} bgColor="goldenrod" boxShadow="xl">
-                            <Flex direction="column">
-                              {media && <Box paddingBlock={1}><RenderMedia media={media} options={{
-                                title: message.substr(0, 11),
-                              }} /></Box>}
-                              <Box p={1}><Text as="h2">{message}</Text>
-                                {/* <InteractiveUserName userName={userName} uid={uid} /> */}
-                                <Text fontWeight="semibold" fontSize=".7rem" color="gray.400">@{userName} </Text>
-                              </Box></Flex>
-                          </TabPanel>)
-
-                      })}
-                    </TabPanels>
-                  </Tabs>
+                  iwData.map((el, i) => {
+                    const { media, message, userName } = el;
+                    return (
+                      <Box key={i} p={0} marginBlock={3} bgColor="goldenrod" boxShadow="xl" width={"100%"}>
+                        <Flex direction="column">
+                          {media && <Box paddingBlock={1}><RenderMedia media={media} options={{
+                            title: message.substr(0, 11),
+                          }} /></Box>}
+                          <Box p={1}><Text as="h2">{message}</Text>
+                            {/* <InteractiveUserName userName={userName} uid={uid} /> */}
+                            <Text fontWeight="semibold" fontSize=".7rem" color="gray.500">@{userName} - {new Date(el.timestamp).toLocaleDateString()} </Text>
+                          </Box></Flex>
+                      </Box>)
+                  })
+                  // </Tabs>
                   :
                   (<> <Box>
                     {iwData[0].media && <RenderMedia media={iwData[0].media} options={{ title: iwData[0].message.substr(0, 11) }} />}
@@ -313,11 +311,11 @@ const AppMap = memo(({
         {/* <HeatmapLayer map={this.state.map && this.state.map} data={data.map(x => {x.location})} /> */}
       </GoogleMap>
       <LocateMeButton
-          pullups={pullups}
-          mapInstance={mapInstance}
-          clientLocation={clientLocation}
-          setClientLocation={setClientLocation}
-        />
+        pullups={pullups}
+        mapInstance={mapInstance}
+        clientLocation={clientLocation}
+        setClientLocation={setClientLocation}
+      />
     </LoadScript>
   );
 });
