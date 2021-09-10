@@ -1,3 +1,4 @@
+import { MyDrawer } from './MyDrawer';
 import React, { useState, memo } from "react";
 
 import { GoogleMap, GoogleMapProps, LoadScript, MarkerClusterer } from "@react-google-maps/api";
@@ -6,16 +7,12 @@ import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-ur
 import MyMarker from "./MyMarker";
 import MyInfoWindow from "./InfoWindow";
 import { GEOCENTER, MAP_STYLES } from "../util/constants";
-import { AspectRatio, Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Flex, Image, Tab, TabList, TabPanel, TabPanels, Tabs, Text, useDisclosure, useToast } from "@chakra-ui/react";
+import { Text, useDisclosure, useToast } from "@chakra-ui/react";
 import { GLocation, PullUp } from "../types";
 import useSWR from "swr";
 import fetcher from "../util/fetch";
-import { InteractiveUserName } from "./InteractiveUserName";
-import { RenderMedia } from "./RenderMedia";
 import { useCallback } from "react";
 import { LocateMeButton } from "./LocateMeButton";
-import { MdPersonPinCircle } from "react-icons/md";
-import { useEffect } from "react";
 const LIBRARIES: Libraries = ["places", "visualization", "geometry", "localContext"];
 
 const clusterStyles = [
@@ -125,10 +122,10 @@ const AppMap = memo(({
 
   const toThreePlaces = (num: number) => num.toString().match(/^-?\d+(?:\.\d{0,3})?/)[0]
 
-  useEffect(() => {
-    const dupes = pullups && checkForOverlaps(pullups)
-    setIwData(dupes)
-  }, [pullups])
+  // useEffect(() => {
+  //   const dupes = pullups && checkForOverlaps(pullups)
+  //   setIwData(dupes)
+  // }, [pullups])
 
 
   const checkForOverlaps = useCallback((data: PullUp[]) => {
@@ -141,15 +138,18 @@ const AppMap = memo(({
     const iwData = Object.values(result).find(el => el.length > 1);
     return iwData;
   }, [pullups])
+
   if (pullups) { toast.closeAll(); }
 
   const onClick = (e: any) => {
     if (mapInstance.zoom == mapInstance.maxZoom) {
       //if map zoom is max, and still have cluster, make infowindow with multiple listings...
       // (tab through cards of pins that sit on top of each other)
-      // console.log("i've clicked..open the drawer", iwData)
+      console.log("i've clicked..open the drawer", iwData)
       if (iwData) {
-        toggleDrawer()
+        const dupes = checkForOverlaps(pullups)
+        setIwData(dupes);
+        toggleDrawer();
       } else {
         console.log("no data")
       }
@@ -265,47 +265,7 @@ const AppMap = memo(({
         {iwData && isWindowOpen && <MyInfoWindow activeData={iwData} clusterCenter={infoWindowPosition} />}
 
         {iwData && isDrawerOpen && (
-          <Drawer
-            // activeData={activeData}
-            isOpen={isDrawerOpen}
-            placement="left"
-            onClose={setDrawerClose}
-          // mapInstance={mapInstance}
-          >
-            <DrawerOverlay />
-            <DrawerContent>
-              <DrawerCloseButton />
-              <DrawerHeader>
-                <Flex dir="row"><MdPersonPinCircle /> Info</Flex>
-              </DrawerHeader>
-              <DrawerBody p={0}>
-                {iwData.length > 1
-                  ?
-                  iwData.map((el, i) => {
-                    const { media, message, userName } = el;
-                    return (
-                      <Box key={i} p={0} marginBlock={3} bgColor="goldenrod" boxShadow="xl" width={"100%"}>
-                        <Flex direction="column">
-                          {media && <Box paddingBlock={1}><RenderMedia media={media} options={{
-                            title: message.substr(0, 11),
-                          }} /></Box>}
-                          <Box p={1}><Text as="h2">{message}</Text>
-                            {/* <InteractiveUserName userName={userName} uid={uid} /> */}
-                            <Text fontWeight="semibold" fontSize=".7rem" color="gray.500">@{userName} - {new Date(el.timestamp).toLocaleDateString()} </Text>
-                          </Box></Flex>
-                      </Box>)
-                  })
-                  // </Tabs>
-                  :
-                  (<> <Box>
-                    {iwData[0].media && <RenderMedia media={iwData[0].media} options={{ title: iwData[0].message.substr(0, 11) }} />}
-                  </Box>
-                    {iwData[0].message}
-                    <InteractiveUserName userName={iwData[0].userName} uid={iwData[0].uid} /></>)
-                }
-              </DrawerBody>
-            </DrawerContent>
-          </Drawer>
+          <MyDrawer   isDrawerOpen={isDrawerOpen} setDrawerClose={setDrawerClose} activeData={iwData} />
         )}
 
         {/* <HeatmapLayer map={this.state.map && this.state.map} data={data.map(x => {x.location})} /> */}

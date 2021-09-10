@@ -29,6 +29,7 @@ const MyMarker = ({
   };
 
   const handleMouseOverMarker = () => {
+    console.log("doesn't work on click...")
     setActiveData([data]);
     toggleWindow();
   };
@@ -36,6 +37,7 @@ const MyMarker = ({
     toggleWindow();
   };
   const handleClickMarker = () => {
+    setActiveData([data]);
     toggleDrawer();
   };
   return (
