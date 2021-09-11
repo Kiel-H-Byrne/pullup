@@ -1,17 +1,12 @@
-import { MyDrawer } from './MyDrawer';
+import { MyClusterer } from './MyClusterer';
 import React, { useState, memo } from "react";
-
 import { GoogleMap, GoogleMapProps, LoadScript, MarkerClusterer } from "@react-google-maps/api";
 import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
-
-import MyMarker from "./MyMarker";
-import MyInfoWindow from "./InfoWindow";
 import { GEOCENTER, MAP_STYLES } from "../util/constants";
 import { Text, useDisclosure, useToast } from "@chakra-ui/react";
 import { GLocation, PullUp } from "../types";
 import useSWR from "swr";
 import fetcher from "../util/fetch";
-import { useCallback } from "react";
 import { LocateMeButton } from "./LocateMeButton";
 const LIBRARIES: Libraries = ["places", "visualization", "geometry", "localContext"];
 
@@ -106,10 +101,7 @@ const AppMap = memo(({
   setMapInstance,
   mapInstance,
 }: IAppMap) => {
-  const { isOpen: isDrawerOpen, onOpen: toggleDrawer, onClose: setDrawerClose } = useDisclosure();
-  const { isOpen: isWindowOpen, onToggle: toggleWindow, onClose: setWindowClose } = useDisclosure();
-  const [infoWindowPosition, setInfoWindowPosition] = useState(null as GLocation);
-  const [iwData, setIwData] = useState(null as PullUp[]);
+
   let { center, zoom, options } = defaultProps;
   const uri = clientLocation ? `/api/pullups?lat=${clientLocation.lat}&lng=${clientLocation.lng}` : null;
   // const uri = clientLocation ? `/api/pullups?lat=${getTruncated(clientLocation.lat)}&lng=${getTruncated(clientLocation.lng)}` : null;
@@ -120,60 +112,7 @@ const AppMap = memo(({
   const pullups: PullUp[] = !error && fetchData?.pullups;
   const toast = useToast();
 
-  const toThreePlaces = (num: number) => num.toString().match(/^-?\d+(?:\.\d{0,3})?/)[0]
-
-  // useEffect(() => {
-  //   const dupes = pullups && checkForOverlaps(pullups)
-  //   setIwData(dupes)
-  // }, [pullups])
-
-
-  const checkForOverlaps = useCallback((data: PullUp[]) => {
-    const result: { [key: string]: PullUp[] } = data.reduce(function (r, a) {
-      const locString = `{lng: ${toThreePlaces(a.location.lng)}, lat: ${toThreePlaces(a.location.lat)}}`
-      r[locString] = r[locString] || [];
-      r[locString].push(a);
-      return r;
-    }, Object.create(null) as { [key: string]: PullUp[] });
-    const iwData = Object.values(result).find(el => el.length > 1);
-    return iwData;
-  }, [pullups])
-
   if (pullups) { toast.closeAll(); }
-
-  const onClick = (e: any) => {
-    if (mapInstance.zoom == mapInstance.maxZoom) {
-      //if map zoom is max, and still have cluster, make infowindow with multiple listings...
-      // (tab through cards of pins that sit on top of each other)
-      console.log("i've clicked..open the drawer", iwData)
-      if (iwData) {
-        const dupes = checkForOverlaps(pullups)
-        setIwData(dupes);
-        toggleDrawer();
-      } else {
-        console.log("no data")
-      }
-    }
-  }
-
-  // const handleMouseOver = (e: any) => {
-  //   if (mapInstance.zoom == mapInstance.maxZoom) {
-  //     //there may be potential for this to not work as expected if multiple groups of markers closeby instead of one?
-  //     // e.markerclusterer.markers.length //length should equal pullups length with close centers (within 5 sig dig)
-  //     const clusterCenter = e.markerClusterer.clusters[0].center;
-  //     // const clusterCenter = JSON.parse(JSON.stringify(e.markerClusterer.clusters[0].center));
-  //     setInfoWindowPosition(clusterCenter)
-  //     // console.log(JSON.stringify(iwData[0].location))
-  //     iwData && setIwData(iwData)
-  //     iwData && toggleWindow()
-  //   }
-  // }
-  // const handleMouseOut = () => {
-  //   if (infoWindowPosition) {
-  //     // setWindowPosition(null)
-  //     toggleWindow()
-  //   }
-  // }
   return (
     // Important! Always set the container height explicitly via mapContainerClassName
     <LoadScript
@@ -206,66 +145,7 @@ const AppMap = memo(({
         {clientLocation && !pullups && toast({ title: "Searching...", status: "info" })}
         {clientLocation && pullups && pullups.length == 0 && toast({ title: "No Results", status: "info" })}
         {clientLocation && pullups && pullups.length !== 0 && (
-          <MarkerClusterer
-            styles={clusterStyles}
-            averageCenter
-            enableRetinaIcons
-            gridSize={30} //how big the square of a cluster is in pixels //60
-            onClick={onClick}
-          // onMouseOver={handleMouseOver}
-          // onMouseOut={handleMouseOut}
-          // onClick={(event) =>{console.log(event.getMarkers())}}
-          // minimumClusterSize={2} //how many need to be in before it makes a cluster //2
-          >
-            {(clusterer) =>
-              pullups.map((markerData) => {
-                //return marker if element categories array includes value from selected_categories\\
-
-                // if ( //if closeby
-                // pullup.categories &&
-                // pullup.categories.some((el) => selectedCategories.has(el))
-                // && mapInstance.containsLocation(listings.location)
-                // ) {
-                // if (pullup.location) {
-                //   const [lat, lng] = pullup.location.split(",");
-
-                //   let isInside = new window.google.maps.LatLngBounds().contains(
-                //     { lat: +lat, lng: +lng }
-                //   );
-                //   // console.log(isInside);
-                // }
-                return (
-                  // return (
-                  //   pullup.categories
-                  //     ? pullup.categories.some((el) =>
-                  //         selected_categories.includes(el)
-                  //       )
-                  //     : false
-                  // ) ? (
-
-                  <MyMarker
-                    key={`marker-${markerData._id}`}
-                    //what data can i set on marker?
-                    data={markerData}
-                    // label={}
-                    // title={}
-                    clusterer={clusterer}
-                    activeData={iwData}
-                    setActiveData={setIwData}
-                    setWindowClose={setWindowClose}
-                    toggleWindow={toggleWindow}
-                    toggleDrawer={toggleDrawer}
-                  />
-                );
-                // }
-              })
-            }
-          </MarkerClusterer>
-        )}
-        {iwData && isWindowOpen && <MyInfoWindow activeData={iwData} clusterCenter={infoWindowPosition} />}
-
-        {iwData && isDrawerOpen && (
-          <MyDrawer   isDrawerOpen={isDrawerOpen} setDrawerClose={setDrawerClose} activeData={iwData} />
+          <MyClusterer clusterStyles={clusterStyles} pullups={pullups} mapInstance={mapInstance}/>
         )}
 
         {/* <HeatmapLayer map={this.state.map && this.state.map} data={data.map(x => {x.location})} /> */}

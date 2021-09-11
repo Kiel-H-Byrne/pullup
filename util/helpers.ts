@@ -1,4 +1,5 @@
-import { GLocation } from "../types";
+import { useCallback } from "react";
+import { GLocation, PullUp } from "../types";
 
 export const targetClient = function (map: any, pos: any) {
   // SET CENTER,
@@ -44,3 +45,19 @@ export const findClosestMarker = function (
 
 export const getTruncated = (float: number) => Math.trunc(float);
 
+export const toThreePlaces = (num: number) => num.toString().match(/^-?\d+(?:\.\d{0,3})?/)[0]
+
+export const makeLocationStringKey = (loc: GLocation) => `{lng: ${toThreePlaces(loc.lng)}, lat: ${toThreePlaces(loc.lat)}}`;
+
+export const checkForOverlaps = (data: PullUp[]) => {
+  const result: { [key: string]: PullUp[] } = data.reduce(function (r, a) {
+    // const locString = `{lng: ${toThreePlaces(a.location.lng)}, lat: ${toThreePlaces(a.location.lat)}}`
+    const locString = makeLocationStringKey(a.location);
+    r[locString] = r[locString] || [];
+    r[locString].push(a);
+    return r;
+  }, Object.create(null) as { [key: string]: PullUp[] });
+  //result is now an object with key of lat/long string
+  // const iwData = Object.values(result).find(el => el.length > 1);
+  return result;
+}

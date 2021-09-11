@@ -4,9 +4,8 @@ import { Marker, MarkerProps } from "@react-google-maps/api";
 
 interface IMyMarker {
   data: any;
+  setIwData: any;
   clusterer: any;
-  activeData: any;
-  setActiveData: any;
   setWindowClose: any;
   toggleWindow: any;
   toggleDrawer: any;
@@ -15,7 +14,7 @@ interface IMyMarker {
 const MyMarker = ({
   data,
   clusterer,
-  setActiveData,
+  setIwData,
   setWindowClose,
   toggleWindow,
   toggleDrawer,
@@ -30,14 +29,14 @@ const MyMarker = ({
 
   const handleMouseOverMarker = () => {
     console.log("doesn't work on click...")
-    setActiveData([data]);
+    setIwData([data])
     toggleWindow();
   };
   const handleMouseOut = () => {
-    toggleWindow();
+    setWindowClose();
   };
   const handleClickMarker = () => {
-    setActiveData([data]);
+    setIwData([data])
     toggleDrawer();
   };
   return (
@@ -47,8 +46,10 @@ const MyMarker = ({
         clusterer={clusterer}
         icon={image}
         onMouseOver={handleMouseOverMarker}
+        onMouseDown={handleClickMarker}
         onMouseOut={handleMouseOut}
-        onClick={handleClickMarker}
+        // onMouseOut={(e) => {console.log(e)}}
+        // onClick={handleClickMarker}
         //@ts-ignore
         // __data={data}
         // visible={categories.some((el) => selectedCategories.has(el))} //check for if category matches selected categories

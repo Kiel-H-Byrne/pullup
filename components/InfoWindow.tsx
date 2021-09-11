@@ -5,7 +5,7 @@ import { Box, Flex, Image, Progress, Tab, TabList, TabPanel, TabPanels, Tabs, Te
 // import { useSession } from "next-auth/client";
 import { RenderMedia } from "./RenderMedia";
 
-const MyInfoWindow = ({ activeData, clusterCenter }: { activeData: PullUp[], clusterCenter: GLocation }) => {
+const MyInfoWindow = ({ activeData, clusterCenter }: { activeData: PullUp[], clusterCenter: google.maps.LatLng }) => {
   const options = {
     pixelOffset: { height: -40, width: 0, equals: undefined },
     disableAutoPan: true,
@@ -14,7 +14,6 @@ const MyInfoWindow = ({ activeData, clusterCenter }: { activeData: PullUp[], clu
   // const hasNoData = !activeData || activeData.length == 0
   const hasOneItem = activeData.length && activeData.length == 1
   // console.log("infowindow fired")
-  // console.log(activeData, hasOneItem)
   // const [session, loading] = useSession()
   return (
 
