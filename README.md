@@ -1,4 +1,5 @@
 <!--- These are examples. See https://shields.io for others or to customize this set of shields. You might want to include dependencies, project status and license info here --->
+![Vercel Deploy](https://vercelbadge.vercel.app/api/tdotholla/pullup)
 ![Github License](https://img.shields.io/github/license/kiel-h-byrne/pullup)
 ![Node Version](https://img.shields.io/node/v/canary)
 ![W3C Validation](https://img.shields.io/w3c-validation/default?targetUrl=https%3A%2F%2Fpullup.kielbyrne.com)
