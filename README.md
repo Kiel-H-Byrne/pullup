@@ -25,6 +25,7 @@ Pull up to a location i.e. downtown SS, the Wharf, etc... without a real destina
 ---
 
 <img width="80%" src="https://github.com/Kiel-H-Byrne/pullup/assets/955269/30253b62-c6c5-4297-a369-c3d5133ee8a8" />
+
 ===
 
 #### types of posts: 
